@@ -1,0 +1,13 @@
+name = "MultiParamContinuation"
+uuid = "f08f8c4f-38fd-45fe-94e7-4d39a6d709c5"
+authors = ["romain veltz <romain.veltz@inria.fr> and contributors"]
+version = "1.0.0-DEV"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
