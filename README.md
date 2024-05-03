@@ -10,7 +10,7 @@ $$F:\mathbb R^{n} \to \mathbb R^m. $$
 
 ## Example
 
-![](/Users/rveltz/work/prog_gd/julia/dev/MultiParamContinuation/examples/torus.png)
+![](https://github.com/rveltz/MultiParamContinuation.jl/blob/main/examples/torus.png?raw=true)
 
 ## Related:
 
