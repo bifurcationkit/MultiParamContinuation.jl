@@ -1,11 +1,13 @@
 # MultiParamContinuation
 
-Perform covering of an immersed manifold $F(u)=0$ where
+Perform covering of an immersed defined manifold $F(u)=0$ where
 
 $$F:\mathbb R^{n} \to \mathbb R^m. $$
 
+> [!WARNING]
 > For now, only 2d immersed manifold are handled, ie n = m+2
 
+> [!WARNING]
 > The algorithm is quadratic in the number $N$ of charts. This will be improved to a $N\log N$ algorithm using a tree.
 
 ## Example
