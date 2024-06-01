@@ -40,8 +40,6 @@ function correct_guess(cache, options::BK.NewtonPar)
     return sol.u
 end
 
-end
-
 ##############################################################################################################
 function project_on_M(prob, guess, chart::Chart, wbar, cpar::CoveringPar{T, <: BK.NewtonPar}) where {T}
     if _has_projection(prob)
