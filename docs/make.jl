@@ -35,5 +35,5 @@ makedocs(
 	)
 
 deploydocs(;
-	repo = "github.com/bifurcationkit/BifurcationKitDocs.jl.git",
+	repo = "github.com/bifurcationkit/MultiParamContinuation.jl.git",
 	push_preview=true, target="build", devbranch="main")
