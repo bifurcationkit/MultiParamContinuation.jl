@@ -1,5 +1,15 @@
 # MultiParamContinuation
 
+| **Documentation** | **Build Status** | **Downloads** |
+|:-----------------:|:----------------:|:-------------:|
+| [![docs-dev][docs-dev-img]][docs-dev-url] |  [![Build Status](https://github.com/bifurcationkit/MultiParamContinuation.jl/workflows/CI/badge.svg)](https://github.com/bifurcationkit/MultiParamContinuation.jl/actions?query=workflow%3ACI) [![codecov](https://codecov.io/gh/bifurcationkit/MultiParamContinuation.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/bifurcationkit/MultiParamContinuation.jl)|  |
+
+[docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
+[docs-stable-url]: https://bifurcationkit.github.io/MultiParamContinuation.jl/stable
+[docs-dev-img]: https://img.shields.io/badge/docs-dev-purple.svg
+[docs-dev-url]: https://bifurcationkit.github.io/MultiParamContinuation.jl/dev
+
+
 Perform covering of an immersed defined manifold $F(u)=0$ where
 
 $$F:\mathbb R^{n} \to \mathbb R^m. $$
