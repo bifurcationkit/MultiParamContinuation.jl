@@ -40,23 +40,6 @@ function correct_guess(cache, options::BK.NewtonPar)
     return sol.u
 end
 
-function get_curvature(prob, c::Chart, par)
-    u0 = c.u
-    Φ = c.Φ
-    n, m = size(prob)
-    d = n-m
-    J = jacobian(prob, u0, par)
-    _A = vcat(J, Φ')
-    A = zeros(d, n, d)
-    for i = 1:d
-        Φi = Φ[:, i]
-        for j = 1:d
-            Φj = Φ[:, j]
-            d2 = d2F(prob, u0, par, Φi, Φj)
-            A[i, :, j] .= _A \ vcat(d2, zeros(d))
-        end
-    end
-    norm(A)
 end
 
 ##############################################################################################################

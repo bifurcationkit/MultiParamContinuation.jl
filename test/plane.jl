@@ -52,3 +52,6 @@ S = continuation(prob,
 
 @test S[1] isa MPC.Chart
 @test length(S) == 109
+
+show(S)
+show(S[1])
