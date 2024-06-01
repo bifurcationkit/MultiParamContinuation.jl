@@ -198,48 +198,12 @@ function add!(node::BVHNode, S::Atlas, id::Int)
     node
 end
 
-function add!(node::BVHNode, S::Atlas, ids::AbstractVector{Int})
-    for id in ids
-        add!(node, S, id)
-    end
-    node
-end
-
-function find_leaf(node::BVHNode, S, id)
-    @assert false
-    if isnothing(node)
-        return nothing
-    end
-    c = S[id]
-    aabb = AABB(c.u .- c.R, c.u .+ c.R)
-    while ~is_leaf(node)
-        node = aabb ∈ node.left_child ? node.left_child : node.right_child
-    end
-    @assert is_leaf(node) "Error. Please report to the website."
-    node
-end
-
 function BVHNode(S::Atlas, dim = 3; max_size::Int = 5)
     tree = BVHNode(dim; max_size)
     for id in eachindex(S.atlas)
         add!(tree, S, id)
     end
     tree
-end
-
-function get_all_ids(tree::BVHNode, ids = Int[])
-    @assert false
-    if is_leaf(tree)
-        append!(ids, tree.chart_ids)
-        return
-    end
-    if ~isnothing(tree.right_child)
-        get_all_ids(tree.right_child, ids)
-    end
-    if ~isnothing(tree.left_child)
-        get_all_ids(tree.left_child, ids)
-    end
-    ids
 end
 
 """
@@ -268,21 +232,3 @@ function _query(tree::BVHNode, aabb::AABB, list)
         end
     end
 end
-
-##############
-using AbstractTrees
-
-AbstractTrees.children(node::BVHNode) = [node.left_child, node.right_child]
-
-## Things that make printing prettier
-function AbstractTrees.printnode(io::IO, node::BVHNode) 
-    if is_leaf(node)
-        printstyled(io, "Leaf : = $(npoints(node)) points, $(node.chart_ids)", color = :green, bold = true)
-    else
-        printstyled(io, "Node", color = :green, bold = true)
-    end
-end
-
-AbstractTrees.printnode(io::IO, ::Nothing) = nothing
-
-printTree(tree::BVHNode) = print_tree(tree)

@@ -30,3 +30,7 @@ MPC.check_alphas(S, S[1])
 MPC.test_P(S[1], S[2])
 MPC.true_intersec_list(S, S[1])
 MPC.get_alpha(S[1], S[2])
+
+# play with bvhtree
+tree = MPC.BVHNode(S)
+show(tree)
