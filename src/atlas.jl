@@ -44,14 +44,6 @@ end
 function is_on_boundary(c::Chart)
     c.interior = ~all(c.inside_ball)
     return c.interior
-    for (iP, P) in enumerate(c.P)
-        in_or_out = c.inside_ball[iP]#is_inside_ball(c, P)
-        if in_or_out == false
-            c.interior = true
-            break
-        end
-    end
-    c.interior
 end
 
 function new_chart(u0, Φ, Radius, P; 
@@ -172,9 +164,8 @@ end
 This is an over-estimate on the charts that intersect c. Better look at `true_intersec_list`.
 """
 function intersec_list(Ω::Atlas, c::Chart, use_tree_bool::Bool = use_tree(Ω))
-    # @error ""  "intersec_list" c.index length(Ω)
     Jᵢᵐ = Int[]
-    if ~use_tree_bool #|| length(Ω) < 50
+    if ~use_tree_bool
         for cΩ in Ω.atlas
             if do_intersect(cΩ, c)
                 push!(Jᵢᵐ, cΩ.index)
@@ -215,7 +206,6 @@ function true_intersec_list(Ω::Atlas, c::Chart, use_tree_bool::Bool = use_tree(
     inter_list = intersec_list(Ω, c, use_tree_bool)
     out = Int[]
     for id in inter_list
-        # @error "" id test_P(c, Ω[id])
         if ~test_P(c, Ω[id])
             push!(out, id)
         end

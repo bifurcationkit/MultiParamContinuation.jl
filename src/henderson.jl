@@ -23,7 +23,7 @@ Base.@kwdef struct Henderson{T} <: AbstractCoveringAlgorithm
     θmax::T = 1.2
     "[Internal]"
     θmin::T = 0.01
-    " Use tree to find neighbors. Useful when the number of charts is large because the complexity changes from N² to N⋅log(N)"
+    " Use a tree to find neighbors. Useful when the number of charts is large because the complexity changes from N² to N⋅log(N)"
     use_tree::Bool = false
     "Number of children per leaf in the tree. Control the depth of the tree."
     children_pre_leaf::Int = 5
@@ -70,7 +70,7 @@ function continuation(prob::AbstractManifoldProblem,
     cache = HendersonCache(prob, contparams, alg, θ, vcat(zeros(m, dim), I(dim)))
     chart0 = init(cache)
     n, m = size(prob)
-    Ω = new_atlas(chart0, cache; dim = n-m )
+    Ω = new_atlas(chart0, cache; dim = n - m )
     update_boundary!(Ω)
     iter = 1
     while length(Ω) < contparams.max_charts && 
@@ -90,11 +90,15 @@ function continuation(prob::AbstractManifoldProblem,
             return Ω
         end
         iter += 1
-        # @logprogress iter / contparams.max_steps
     end
     return Ω
 end 
 
+"""
+$SIGNATURES
+
+Perform one step of the continuation algorithm.
+"""
 function step!(Ω::Atlas)
     alg = Ω.alg
     new_chart = generate_new_chart(Ω)
@@ -107,12 +111,16 @@ function step!(Ω::Atlas)
     remove_halfspace!(Ω, new_chart)
     if ~is_on_boundary(new_chart) && alg.contparams.verbose > 0
         @warn "new chart $(new_chart.index) is not on boundary"
-        # return false
     end
     update_boundary!(Ω)
     return true
 end
 
+"""
+$SIGNATURES
+
+Perform n steps of the continuation algorithm.
+"""
 function step!(Ω::Atlas, n::Int)
     @progress for _ in Base.OneTo(n)
         step!(Ω)
@@ -131,7 +139,7 @@ function init(cache::HendersonCache)
     # get tangent space
     T = get_tangent(prob, u0, prob.params, cache._rhs_tangent)
     R = contparams.R0
-    Ps = (init_polygonal_boundary(alg.np0, R))
+    Ps = init_polygonal_boundary(alg.np0, R)
     data = prob.recordFromSolution(u0, prob.params)
     eve = prob.event_function(u0, prob.params)
     return new_chart(u0, T, R, Ps; id = 1, data, eve)
@@ -148,7 +156,9 @@ function correct_guess(cache, nl_spec::NonLinearSolveSpec)
 end
 
 """
-    Compute the projection of guess on the manifold M
+$SIGNATURES
+
+Compute the projection of guess on the manifold M
 """
 function project_on_M(prob, guess, chart::Chart, wbar, cpar::CoveringPar{T, <: NonLinearSolveSpec}) where {T}
     if _has_projection(prob)
@@ -259,7 +269,7 @@ function generate_new_chart(Ω::Atlas; id = length(Ω) + 1)
         # angle between tangent spaces, do not compute if delta_angle large enough
         δα = delta_angle > pi ? 0 : abs(largest_principal_angle(c.Φ, new_chart.Φ))
         if δα > delta_angle ||
-                    dst > ϵ
+                dst > ϵ
             verbose && @error "Reduction"  δα dst cache.θ
             @goto failed
         else 
@@ -306,7 +316,7 @@ function remove_halfspace_first_chart!(charti::Chart, chartj::Chart)
     if n₊ == n || n₊ == 0
         return false
     end
-    # @error "##################" charti.index chartj.index n₊ n₋ testp'
+
     ind = 0
     while sum(testp[1:n₊]) < n₊ && ind < n
         α = testp[1]
@@ -318,17 +328,12 @@ function remove_halfspace_first_chart!(charti::Chart, chartj::Chart)
     end
 
     @assert sum(testp) == n₊
-    if sum(testp[1:n₊]) != n₊
-        # @error "" testp' n₊ n₋ charti.index chartj.index
-        # @assert false "Seems like a non-convex polygon. Please report to the website."
-    end
 
     _l = length(charti.P)
     rg = eachindex(charti.P) .+ ind
     Pi_circ = [charti.P[mod1(ii, _l)] for ii in rg]
     # the testp looks like [1,1,1,1,1,0,0,0,0]
     testp = ([2dot(s, du) < Bound for s in Pi_circ])
-    # @error "" testp'
 
     j = findlast(testp) # exist because n₊ > 0
     newPi = [Pi_circ[k] for k = 1:j]
@@ -347,9 +352,6 @@ function remove_halfspace_first_chart!(charti::Chart, chartj::Chart)
     push!(newPi, new_P_indj)
     charti.P = newPi
 
-    # shared = charti.shared[rg][1:end-2]; push!(shared, true); push!(shared, true)
-    # shared = [false for _ = 1:length(Pi⁰)-2]; push!(shared, true); push!(shared, true)
-    # charti.shared = shared
     charti.inside_ball = ([is_inside_ball(charti, P) for P in charti.P])
     update!(charti)
     return true
@@ -372,7 +374,7 @@ function remove_halfspace!(Ω::Atlas, c1::Chart)
     end
 end
 
-### TODO REMOVE AFTER DEBUGGING
+### TODO REMOVE THIS FUNCTION
 function _remove_halfspace!(Ω::Atlas, c1::Chart)
     verbose = Ω.alg.contparams.verbose > 0
     int_list = intersec_list(Ω, c1)
@@ -380,7 +382,6 @@ function _remove_halfspace!(Ω::Atlas, c1::Chart)
         cΩ = Ω[id]
         @assert cΩ.index == id
         verbose && println("Merge c$(c1.index) with $(cΩ.index)")
-        # remove_halfspace!(c1, cΩ, verbose)
         remove_halfspace_first_chart!(c1, cΩ)
     end
     c1

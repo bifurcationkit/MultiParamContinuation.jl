@@ -6,13 +6,13 @@ It incorporates a continuation algorithm [^Henderson][^Dankowicz] based on a New
 
 ## Limitations
 
-As this is early work, the following limitations need to be addressed
+As this is early work, the following limitations need to be addressed.
 
-- partially optimized for speed (allocations, static arrays, etc)
-- not suitable as is for large scale problems although it is very simple to address this. For example, the interface for jacobian free computation has not been pushed.
-- it only computes 2d manifolds for now, *i.e.* $n=m+2$
-- loose detection of continuous events (no bisection)
-- improve interface for using BVH search tree in large dimensions.
+- It is *partially* optimized for speed (allocations, static arrays, etc)
+- It is not suitable as is for large scale problems although it is very simple to address this. Note that the interface for jacobian free computation has yet to been pushed.
+- It only computes 2d manifolds for now, *i.e.* $n=m+2$
+- It allows loose detection of continuous events (no bisection)
+- One needs to improve interface for using BVH search tree in large dimensions.
 
 ## Installation
 
