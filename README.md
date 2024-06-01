@@ -7,7 +7,7 @@
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [docs-stable-url]: https://bifurcationkit.github.io/MultiParamContinuation.jl/stable
 [docs-dev-img]: https://img.shields.io/badge/docs-dev-purple.svg
-[docs-dev-url]: https://bifurcationkit.github.io/MultiParamContinuation.jl/dev
+[docs-dev-url]: https://bifurcationkit.github.io/MultiParamContinuation.jl/dev/
 
 
 Perform covering of an immersed defined manifold $F(u)=0$ where
