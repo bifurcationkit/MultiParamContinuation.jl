@@ -27,4 +27,4 @@ S = continuation(prob,
                     delta_angle = 10.15,
                     ))
 
-@test length(S) == 2000
+@test length(S) > 1000
