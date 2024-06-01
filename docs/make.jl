@@ -3,7 +3,6 @@ cd(@__DIR__)
 pkg" activate ."
 pkg" dev Documenter BifurcationKit"
 
-
 using Documenter, BifurcationKit, MultiParamContinuation
 
 # using DocThemeIndigo
@@ -27,9 +26,6 @@ makedocs(
 		"Covering methods" => [
 			"Henderson" => "henderson.md",
 				],
-		# "Basics" => [
-			# "Plot functions" => "plotting.md",
-			# ],
 		"Problems" => [
 			"Manifold Problems" => "BifProblem.md",
 			"BifurcationKit" => "BifProblemBK.md",
