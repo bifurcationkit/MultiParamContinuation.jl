@@ -11,7 +11,7 @@ using MultiParamContinuation, LinearAlgebra
 
 const MPC = MultiParamContinuation
 
-F(u,p) = [u[1]^2 + u[2]^2 + u[3]^2 - 1] # sphere
+F(u,p) = [u[1]^2 + u[2]^2 + u[3]^2 - 1]
 
 function get_tangent(u, par)
     # compute the normal

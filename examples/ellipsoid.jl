@@ -12,15 +12,13 @@ using MultiParamContinuation
 using Test, LinearAlgebra
 const MPC = MultiParamContinuation
 
-F(u,p) = [u[1]^2 + u[2]^2 + p.R * u[3]^2 - 1] # sphere
+F(u,p) = [u[1]^2 + u[2]^2 + p.R * u[3]^2 - 1]
 
 prob = ManifoldProblem(F, 
                     [0. ,0, 1],
                     (R = 2.,);
-                    # get_tangent
                         )
 
-# problem quand j'ajoute une charte
 S = MPC.continuation(prob,
             Henderson(np0 = 4,
                         θmin = 0.001,

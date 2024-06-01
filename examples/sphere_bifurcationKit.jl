@@ -19,7 +19,6 @@ F(u,p) = [u[1]^2 + u[2]^2 + u[3]^2 - 1] # sphere
 prob = ManifoldProblem_BK(F, 
                     [1.1,0.,0.],
                     nothing;
-                    # get_tangent
                         )
 
 # problem quand j'ajoute une charte
