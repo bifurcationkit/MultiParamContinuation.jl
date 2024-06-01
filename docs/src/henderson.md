@@ -40,8 +40,9 @@ The algorithm ends when all the charts have their polygon inside the validity ba
 
 In the case this is not the case, the algorithm selects such a chart $C = (u_0,B_{R_0}(0), \mathbb P)$ and define a new chart $C_{new}$ by using an exterior vertex $s$ of $\mathbb P$. $s$ is projected on the manifold $\mathcal M$, its tangent space is computed, its radius is $R_0$ and the new polygon is the cube. The new chart $C_{new}$ is then intersected with the previously computed charts.
 
+## Search tree
 
-
+When the projection is very quickly computed, the limiting factor of the algorithm becomes finding the neighbors of a chart. This can become slow when the atlas is large giving a quadratic $N^2$ complexity in total. This can be alleviated by using a BVH tree to obtain a $N\log N$ complexity as explained in [^Henderson]. This is implemented in `MultiParamContinuation.jl` and can be set up in the struct `Henderson`, see its associated doc.
 
 ## References
 
