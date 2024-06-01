@@ -2,7 +2,7 @@
 BifurcationKit = "0f109fa4-8a5d-4b75-95aa-f515264e7665"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
-MultiParamContinuation = "9e8ed938-1fb1-484b-b23d-bad17ddf04c5"
+MultiParamContinuation = "f08f8c4f-38fd-45fe-94e7-4d39a6d709c5"
 
 [compat]
 Documenter = "0.27,^1.0"
