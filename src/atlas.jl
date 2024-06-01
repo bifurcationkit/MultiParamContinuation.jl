@@ -230,9 +230,6 @@ function do_intersect(c1::Chart, c2::Chart)
     u2 = c2.u
     R2 = c2.R
     return dist2(u1, u2) <= (R1 + R2)^2
-    return sum((abs2(x - y) for (x, y) in zip(u1, u2))) <= (R1 + R2)^2
-    du = u2 .- u1
-    return norm(du, 2) <= R1 + R2
 end
 
 function Base.show(io::IO, Ω::Atlas{dim}) where {dim}
