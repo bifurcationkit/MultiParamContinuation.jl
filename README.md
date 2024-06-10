@@ -10,7 +10,7 @@
 [docs-dev-url]: https://bifurcationkit.github.io/MultiParamContinuation.jl/dev/
 
 
-Perform covering of an immersed defined manifold $F(u)=0$ where
+Perform covering of an immersed manifold $F(u)=0$ where
 
 $$F:\mathbb R^{n} \to \mathbb R^m. $$
 
