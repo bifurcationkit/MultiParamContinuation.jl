@@ -12,7 +12,7 @@ function ManifoldProblem_BK(F, u0, par;
                         event_function = event_default,
                         finalize_solution = finalize_default,
                         prob_cons = nothing)
-    bifprob = BifurcationProblem(F, u0, par, (@lens _))
+    bifprob = BifurcationProblem(F, u0, par, (@optic _))
     m = length(BK.residual(bifprob.VF, u0, par))
     ManifoldProblemBK(bifprob, u0, par;
                         m,
