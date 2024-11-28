@@ -1,12 +1,12 @@
 """
 $TYPEDEF
 
-Struct to specifiy the nonlinear solver and its arguments (options).
+Struct to specify the nonlinear solver and its arguments (options).
 
 ## Fields
 
 - `nl_solver` nonlinear solver, defaults to `NewtonRaphson()`.
-- `options` key word arguments passed to the nonlinear solver. Example `abstol = 1e-12`.
+- `options` keyword arguments passed to the nonlinear solver. Example `abstol = 1e-12`.
 
 ## constructor
 
@@ -41,12 +41,12 @@ $TYPEDFIELDS
     "[Internal] Minimal radius of polyhedra."
     Rmin::T = 0.001
     "Maximum angle difference between charts' tangent spaces in radians."
-    delta_angle::T = 2pi
+    delta_angle::T = 2π
     "Maximum number of charts."
     max_charts::UInt = 100
     "Maximum number of continuation steps. Because of mesh adaptation or failure, the number of computed charts is less or equal than `max_steps`."
     max_steps::UInt = 1000
-    "Verbose mode, {0,1,2}. verbose = 0 prints nothing. verbose = 1 prints the charts, verbose = 2 print the intersection of the charts."
+    "Verbose mode, belongs to {0,1,2}. verbose = 0 prints nothing. verbose = 1 prints the charts, verbose = 2 print the intersection of the charts."
     verbose::Int = false
     "Newton options."
     newton_options::Tnl = NonLinearSolveSpec()

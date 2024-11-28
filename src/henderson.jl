@@ -23,7 +23,7 @@ Base.@kwdef struct Henderson{T} <: AbstractCoveringAlgorithm
     θmax::T = 1.2
     "[Internal]"
     θmin::T = 0.01
-    " Use a tree to find neighbors. Useful when the number of charts is large because the complexity changes from N² to N⋅log(N)"
+    " Use tree to find neighbors. Useful when the number of charts is large because the complexity changes from N² to N⋅log(N)."
     use_tree::Bool = false
     "Number of children per leaf in the tree. Control the depth of the tree."
     children_pre_leaf::Int = 5
@@ -52,17 +52,16 @@ mutable struct HendersonCache{T1, T2 <: CoveringPar, T3, T4, T5}
 
 end
 
-
 """
 $SIGNATURES
 
 Main function for covering the manifold defined in `prob` using the algorithm `alg`.
 """
 function continuation(prob::AbstractManifoldProblem, 
-                alg::Henderson, 
-                contparams::CoveringPar;
-                verbose = contparams.verbose,
-                θ = one(eltype(prob)))
+                      alg::Henderson, 
+                      contparams::CoveringPar;
+                      verbose = contparams.verbose,
+                      θ = one(eltype(prob)))
     _verbose = verbose > 0
     # create cache for covering algorithm
     n, m = size(prob)
@@ -105,7 +104,7 @@ function step!(Ω::Atlas)
     if isnothing(new_chart)
         return false
     end
-    # We first add new_chart to Ω in order to update the tree
+    # We first add new_chart to Ω in order to update the tree.
     # We then update the polygon set of new_chart in remove_halfspace!
     add!(Ω, new_chart)
     remove_halfspace!(Ω, new_chart)
@@ -180,6 +179,9 @@ function project_on_M(prob, guess, chart::Chart, wbar, cpar::CoveringPar{T, <: N
     end
 end
 
+"""
+Create a chart from guess after projecting it on the manifold.
+"""
 function _new_chart_from_guess(cache, chart, ω; 
                     R = cache.contparams.R0, 
                     id = 0)
@@ -269,7 +271,7 @@ function generate_new_chart(Ω::Atlas; id = length(Ω) + 1)
         # angle between tangent spaces, do not compute if delta_angle large enough
         δα = delta_angle > pi ? 0 : abs(largest_principal_angle(c.Φ, new_chart.Φ))
         if δα > delta_angle ||
-                dst > ϵ
+                    dst > ϵ
             verbose && @error "Reduction"  δα dst cache.θ
             @goto failed
         else 

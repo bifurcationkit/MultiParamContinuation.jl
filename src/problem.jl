@@ -66,7 +66,7 @@ for op in (:ManifoldProblem, :ManifoldProblemBK)
     function $op(F, u0, par;
                     m = length(F(u0, par)),
                     check_dim::Bool = true,
-                    recordFromSolution = (u,p) -> nothing,
+                    record_from_solution = (u,p) -> nothing,
                     project = nothing,
                     get_radius = get_radius_default,
                     get_tangent = nothing,
@@ -85,7 +85,7 @@ for op in (:ManifoldProblem, :ManifoldProblemBK)
             F,
             u0,
             par,
-            recordFromSolution,
+            record_from_solution,
             project,
             get_tangent,
             get_radius,
