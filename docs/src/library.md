@@ -37,6 +37,16 @@ MultiParamContinuation.ManifoldProblemBK
 Henderson
 ```
 
+## Continuation methods
+
+```@docs
+step!
+```
+
+```@docs
+continuation
+```
+
 ## [Bounding functions](@id bouding-space)
 
 ```@docs
