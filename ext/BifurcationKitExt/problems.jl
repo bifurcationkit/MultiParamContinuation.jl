@@ -5,7 +5,7 @@ $SIGNATURES
 """
 function ManifoldProblem_BK(F, u0, par;
                         check_dim::Bool = true,
-                        recordFromSolution = (u,p) -> nothing,
+                        record_from_solution = (u,p;k...) -> nothing,
                         project = nothing,
                         get_radius = get_radius_default,
                         get_tangent = nothing,
@@ -17,7 +17,7 @@ function ManifoldProblem_BK(F, u0, par;
     ManifoldProblemBK(bifprob, u0, par;
                         m,
                         check_dim,
-                        recordFromSolution,
+                        record_from_solution,
                         project,
                         get_radius,
                         get_tangent,
@@ -33,7 +33,7 @@ BK.getlens(::ManifoldProblemBK) = nothing
 
 function correct_guess(cache, options::BK.NewtonPar)
     prob = cache.prob
-    sol = BK.newton(prob.VF, options)
+    sol = BK.solve(prob.VF, BK.Newton(), options)
     if ~BK.converged(sol)
         throw("Newton for first point did not converge!!")
     end

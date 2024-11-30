@@ -15,7 +15,7 @@ $SIGNATURES
 - `plot_center = true`, plot the center of the charts
 - `put_ids = false` add the indices of the charts
 - `draw_frame = false` plot the local frame on the tangent space
-- `ind_plot=1:2` indices used to plot in the 2d space
+- `ind_plot = 1:2` indices used to plot in the 2d space
 """
 function plotd(ax, chart::Chart; 
                 ind = 1,
@@ -27,6 +27,7 @@ function plotd(ax, chart::Chart;
                 put_ids = false,
                 plot_center = false,
                 draw_edges = false,
+                record_from_solution = (u, p) -> u,
                 k...)
     u0 = isnothing(chart.data) ? chart.u : chart.data
     T = chart.Φ
@@ -60,11 +61,11 @@ function plotd(ax, chart::Chart;
     if draw_frame
         R /= 3
         lines!(ax, [u0[1], u0[1] + R * us[1]], 
-                [u0[2], u0[2] + R * us[2]], 
-                [u0[3], u0[3] + R * us[3]]; label = nothing, color = :red, k...)
+                   [u0[2], u0[2] + R * us[2]], 
+                   [u0[3], u0[3] + R * us[3]]; label = nothing, color = :red, k...)
         lines!(ax, [u0[1], u0[1] + R * ut[1]], 
-                [u0[2], u0[2] + R * ut[2]],
-                [u0[3], u0[3] + R * ut[3]]; label = nothing, color = :green, k...)
+                   [u0[2], u0[2] + R * ut[2]],
+                   [u0[3], u0[3] + R * ut[3]]; label = nothing, color = :green, k...)
     end
 
     if plot_center ||  chart.index == colorrange[end]
@@ -81,96 +82,6 @@ function plotd(chart::Chart; k...)
     plotd(ax, chart; ind = 1, colorrange = (1,2), k...)
     f
 end
-
-"""
-$SIGNATURES
-
-2d plot of the manifold.
-
-## Optional arguments
-- `draw_circle::Bool` plot the validity ball
-- `draw_tangent = true` plot the tangent space
-- `plot_center = true`, plot the center of the charts
-- `put_ids = false` add the indices of the charts
-- `draw_frame = false` plot the local frame on the tangent space
-- `ind_plot=1:2` indices used to plot in the 2d space
-"""
-# function plot2d_slow(ax, chart::Chart; ind = 1,
-#                 ind_plot = 1:2,
-#                 angles = nothing,
-#                 draw_circle = false,
-#                 colorrange = nothing,
-#                 draw_frame = false,
-#                 put_ids = false,
-#                 plot_center = true,
-#                 _color = (is_on_boundary(chart) ? :orange : ind),
-#                 k...)
-#     indx = ind_plot[1]
-#     indy = ind_plot[2]
-
-#     u0 = chart.u
-#     # u0 = isnothing(chart.data) ? chart.u : chart.data
-#     T = chart.Φ
-#     R = chart.R
-
-#     Φ = s -> u0 .+ T * s
-#     Pt = Point2f[Φ(pt)[ind_plot] for pt in chart.P]
-#     push!(Pt, Point2f(Φ(chart.P[1])[ind_plot]))
-
-#     poly!(ax, Pt; 
-#             label = nothing,
-#             alpha = 0.2,
-#             strokecolor = :black,
-#             strokewidth = 1,
-#             color = _color,
-#             colorrange)
-
-#     # plots circle
-#     if draw_circle
-#         Pt = mapreduce(Φ, hcat, [R .* [cos(θ), sin(θ)] for θ in LinRange(0, 2pi, 100)])
-#         lines!(ax, Pt[ind_plot[1],:], Pt[ind_plot[2],:]; label = nothing, color = ind, colorrange, k...)
-#     end
-
-#     if draw_frame
-#         us = get_tangent(T, 1)
-#         ut = get_tangent(T, 2)
-
-#         R /= 3
-#         lines!(ax, [u0[indx], u0[indx] + R * us[indx]], [u0[indy], u0[indy] + R * us[indy]]; label = nothing, color = :red, k...)
-#         lines!(ax, [u0[indx], u0[indx] + R * ut[indx]], [u0[indy], u0[indy] + R * ut[indy]]; label = nothing, color = :green, k...)
-#     end
-
-#     if plot_center
-#         scatter!(ax, [u0[indx]], [u0[indy]]; label = "$ind", color = ind, colorrange)
-#     end
-
-#     if put_ids
-#         text!(ax, [u0[indx]], [u0[indy] + 0.005], text = "$(chart.id)")
-#     end
-#     ax
-# end
-
-# function plot2d_slow(chart::Chart; k...)
-#     f = Figure()
-#     ax = Axis(f[1,1])
-#     plot2d(ax, chart; ind = 1, colorrange = (1,2), k...)
-#     f
-# end
-
-# function plot2d_slow(ax, Σ::Atlas; k...)
-#     n = length(Σ)+1
-#     for (ind, chart) in pairs(Σ.atlas)
-#         plot2d(ax, chart; ind, colorrange = (1,n), k... )
-#     end
-#     ax
-# end
-
-# function plot2d_slow(Σ::Atlas; size = (700,700), k...)
-#     f = Figure(;size)
-#     ax = Axis(f[1,1], xlabel = "x", ylabel = "y")
-#     plot2d(ax, Σ; k...)
-#     f
-# end
 
 function plotd(ax, Σ::Atlas; k...)
     n = length(Σ)
@@ -190,15 +101,28 @@ end
 function plotcenters(Σ::Atlas; size = (700,700), k...)
     f = Figure(;size)
     if ~isnothing(Σ[1].data)
-        centers = mapreduce(x->x.data, hcat, Σ.atlas)
+        centers = mapreduce(x -> x.data, hcat, Σ.atlas)
     else
-        centers = mapreduce(x->x.u, hcat, Σ.atlas)
+        centers = mapreduce(x -> x.u, hcat, Σ.atlas)
     end
     ax = Axis3(f[1,1], aspect = :data, title = "$(length(Σ)) charts")
     scatter!(ax, centers, color = centers[1,:])
     f
 end
 
+"""
+$SIGNATURES
+
+2d plot of the manifold.
+
+## Optional arguments
+- `draw_circle::Bool` plot the validity ball
+- `draw_tangent = true` plot the tangent space
+- `plot_center = true`, plot the center of the charts
+- `put_ids = false` add the indices of the charts
+- `draw_frame = false` plot the local frame on the tangent space
+- `ind_plot=1:2` indices used to plot in the 2d space
+"""
 function plot2d(Σ::Atlas; size = (700,700), 
                         ind_plot = 1:2,
                         plot_circle = false,
@@ -339,12 +263,6 @@ end
 ##############################################################################################################
 
 function plotkd!(ax, tree)
-    # if ~isnothing(tree.head.left)
-    #     plot_node!(ax, tree.head.left)
-    # end
-    # if ~isnothing(tree.head.right)
-    #     plot_node!(ax, tree.head.right)
-    # end
     plot_node!(ax, tree.head)
     ax
 end
@@ -362,8 +280,6 @@ function plotkd_sub!(ax, node::BVHNode, S; id = 1, ncolor = 2)
     else
         side .+= 0.005
     end
-
-    # @error "" id ncolor ρ
 
     if 1==1#~is_leaf(node)
         poly!(ax, Rect(box.min[1], box.min[2], side[1], side[2]); 

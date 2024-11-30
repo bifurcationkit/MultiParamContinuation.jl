@@ -16,7 +16,9 @@ module BifurcationKitExt
                                     get_tangent,
                                     _has_tangent_computation,
                                     jacobian,
-                                    d2F 
+                                    d2F,
+                                    continuation,
+                                    CoveringPar
 
     include("problems.jl")
 end
