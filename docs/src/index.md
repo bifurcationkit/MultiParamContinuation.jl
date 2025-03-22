@@ -14,7 +14,7 @@ As this is early work, the following limitations need to be addressed.
 - It allows loose detection of continuous events (no bisection)
 - One needs to improve interface for using BVH search tree in large dimensions.
 
-## Installation
+## 📦 Installation
 
 To install it, please run
 
@@ -24,25 +24,10 @@ To install the bleeding edge version, please run
 
 `] add MultiParamContinuation#master`
 
-## Citing this work
-If you use this package for your work, we ask that you **cite** the following paper!! Open source development strongly depends on this. It is referenced on HAL-Inria as follows:
+## 📚 Citing this work
+If you use this package for your work, we ask that you **cite** the following paper!! Open source development strongly depends on this. It is referenced on [HAL-Inria](https://hal.archives-ouvertes.fr/hal-02902346) with *bibtex* entry [CITATION.bib](https://github.com/bifurcationkit/BifurcationKit.jl/blob/master/CITATION.bib).
 
-```
-@misc{veltz:hal-02902346,
-  TITLE = {{BifurcationKit.jl}},
-  AUTHOR = {Veltz, Romain},
-  URL = {https://hal.archives-ouvertes.fr/hal-02902346},
-  INSTITUTION = {{Inria Sophia-Antipolis}},
-  YEAR = {2020},
-  MONTH = Jul,
-  KEYWORDS = {pseudo-arclength-continuation ; periodic-orbits ; floquet ; gpu ; bifurcation-diagram ; deflation ; newton-krylov},
-  PDF = {https://hal.archives-ouvertes.fr/hal-02902346/file/354c9fb0d148262405609eed2cb7927818706f1f.tar.gz},
-  HAL_ID = {hal-02902346},
-  HAL_VERSION = {v1},
-}
-```
-
-## Other softwares
+## 🧑‍💻 Other softwares
 
 There are many good softwares already available.
 
@@ -51,8 +36,6 @@ There are many good softwares already available.
 - For large scale problems, there is only [Trilinos-LOCA](https://trilinos.github.io/nox_and_loca.html)
 
 In Julia, there is no other alternative to the current package.
-
-## Reproducibility
 
 
 ## References
