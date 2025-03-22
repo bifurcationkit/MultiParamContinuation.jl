@@ -110,11 +110,11 @@ struct Atlas{dim, Tc, Talg, Ttree}
     tree::Ttree
 end
 # see https://discourse.julialang.org/t/mutable-struct-vs-ref-in-an-immutable-one/92846/2
-Base.length(a::Atlas) = length(a.atlas)
-Base.getindex(a::Atlas, k::Int) = getindex(a.atlas, k)
-Base.lastindex(a::Atlas) = lastindex(a.atlas)
-@inline get_boundary_list(a::Atlas) = a.BList
-@inline use_tree(a::Atlas) = a.alg.alg.use_tree
+Base.length(Ω::Atlas) = length(Ω.atlas)
+Base.getindex(Ω::Atlas, k::Int) = getindex(Ω.atlas, k)
+Base.lastindex(Ω::Atlas) = lastindex(Ω.atlas)
+@inline get_boundary_list(Ω::Atlas) = Ω.BList
+@inline use_tree(Ω::Atlas) = Ω.alg.alg.use_tree
 
 # constructor
 function new_atlas(c::Tc, cache::Talg = nothing; dim::Int = 2) where {Tu, Ttg, Tc <: Chart{Tu, Ttg}, Talg}

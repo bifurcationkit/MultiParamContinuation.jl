@@ -17,11 +17,11 @@ function F(u,p) # CUSP
 end
 
 prob = ManifoldProblem(F, [-1,0,1,0.], nothing; 
-                    recordFromSolution = (u,p) -> (u[3], u[4], u[1]+u[3]),
+                    record_from_solution = (u,p;k...) -> (u[3], u[4], u[1]+u[3]),
                     finalize_solution = Cube(2.),
                     )
 
-S = @time continuation(prob,
+S = @time MPC.continuation(prob,
             Henderson(np0 = 8, 
                         use_tree = true
                         ),

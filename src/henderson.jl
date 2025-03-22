@@ -3,7 +3,7 @@ abstract type AbstractCoveringAlgorithm end
 """
 $TYPEDEF
 
-Continuation algorithm from [1] computing implicitely defined 2d manifolds. 
+Continuation algorithm from [1] computing implicitly defined 2d manifolds. 
 
 ## Fields
 
@@ -11,7 +11,7 @@ $TYPEDFIELDS
 
 ## Reference(s)
 
-[1] Henderson, Michael E. “Multiple Parameter Continuation: Computing Implicitly Defined k-Manifolds.” International Journal of Bifurcation and Chaos 12, no. 03 (March 2002): 451–76. https://doi.org/10.1142/S0218127402004498.
+[1] Henderson, Michael E. “Multiple Parameter Continuation: Computing Implicitly Defined k-Manifolds.” International Journal of Bifurcation and Chaos 12, no. 03 (March 2002): 451-76. https://doi.org/10.1142/S0218127402004498.
 
 """
 Base.@kwdef struct Henderson{T} <: AbstractCoveringAlgorithm
@@ -49,7 +49,6 @@ mutable struct HendersonCache{T1, T2 <: CoveringPar, T3, T4, T5}
     θ::T4
     "[Internal] cache for storing the tangent space"
     _rhs_tangent::T5
-
 end
 
 """
@@ -71,12 +70,12 @@ function continuation(prob::AbstractManifoldProblem,
     n, m = size(prob)
     Ω = new_atlas(chart0, cache; dim = n - m )
     update_boundary!(Ω)
-    iter = 1
+    n_steps = 1
     while length(Ω) < contparams.max_charts && 
-               iter < contparams.max_steps
+            n_steps < contparams.max_steps
         if _verbose
             println("━"^50)
-            println("─── step     = ", iter)
+            println("─── step     = ", n_steps)
             println(" ├─ # charts = ", length(Ω))
             println(" └─ new boundary chart R = ", Ω[end].R)
             println("           ├─         u[1:3] = ", Ω[end].u[1:3])
@@ -88,7 +87,7 @@ function continuation(prob::AbstractManifoldProblem,
         if ~step!(Ω)
             return Ω
         end
-        iter += 1
+        n_steps += 1
     end
     return Ω
 end 
