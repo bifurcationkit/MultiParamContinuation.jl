@@ -26,12 +26,12 @@ $$F:\mathbb R^{n} \to \mathbb R^m. $$
 This package requires Julia >= v1.3.0
 
 To install it, please run
-
-`] add MultiParamContinuation`
+ 
+`] add https://github.com/bifurcationkit/MultiParamContinuation.jl`
 
 To install the bleeding edge version, please run
 
-`] add MultiParamContinuation#master`
+`] add https://github.com/bifurcationkit/MultiParamContinuation.jl#master`
 
 ## 📚 Support and citation
 If you use `BifurcationKit.jl` in your work, we ask that you cite the following paper on [HAL-Inria](https://hal.archives-ouvertes.fr/hal-02902346) with *bibtex* entry [CITATION.bib](https://github.com/bifurcationkit/BifurcationKit.jl/blob/master/CITATION.bib). Open source development as part of academic research strongly depends on this. Please also consider starring this repository if you like our work, this will help us to secure funding in the future.
