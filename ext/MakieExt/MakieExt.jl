@@ -1,5 +1,5 @@
-module GLMakieExt
-    using GLMakie, MultiParamContinuation
+module MakieExt
+    using Makie, MultiParamContinuation
 
     using DocStringExtensions, StaticArrays
 

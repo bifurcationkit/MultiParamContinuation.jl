@@ -19,19 +19,19 @@ Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [weakdeps]
 BifurcationKit = "0f109fa4-8a5d-4b75-95aa-f515264e7665"
-GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
+Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 
 [extensions]
 BifurcationKitExt = "BifurcationKit"
-GLMakieExt = "GLMakie"
+MakieExt = "Makie"
 
 [compat]
-GLMakie = "0.10, 0.11"
+BifurcationKit = "^0.4"
+Makie = "^0.21, ^0.22"
 julia = "1.9, 1.10"
-"BifurcationKit" = "^0.4"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "BifurcationKit"]
+test = ["Test"]

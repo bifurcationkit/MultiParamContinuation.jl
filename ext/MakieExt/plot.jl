@@ -1,5 +1,5 @@
-using GLMakie.Colors
-using GLMakie.GeometryBasics
+using Makie.Colors
+using Makie.GeometryBasics
 using StaticArrays
 
 @inline get_tangent(A::AbstractMatrix, i::Int) = @view A[:, i]
@@ -27,7 +27,7 @@ function plotd(ax, chart::Chart;
                 put_ids = false,
                 plot_center = false,
                 draw_edges = false,
-                record_from_solution = (u, p) -> u,
+                record_from_solution = (u, p; k...) -> u,
                 k...)
     u0 = isnothing(chart.data) ? chart.u : chart.data
     T = chart.Φ

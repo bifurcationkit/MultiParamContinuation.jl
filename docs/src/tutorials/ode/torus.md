@@ -5,7 +5,7 @@ In this tutorial, we show how to cover a torus.
 It is easy to encode the manifold as follows
 
 ```@example TUTTORUS
-using GLMakie, MultiParamContinuation
+using CairoMakie, MultiParamContinuation
 const MPC = MultiParamContinuation
 
 function F(u,p)

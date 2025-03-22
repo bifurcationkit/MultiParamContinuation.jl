@@ -1,7 +1,7 @@
 [deps]
 BifurcationKit = "0f109fa4-8a5d-4b75-95aa-f515264e7665"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
-GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 MultiParamContinuation = "f08f8c4f-38fd-45fe-94e7-4d39a6d709c5"
 
 [compat]

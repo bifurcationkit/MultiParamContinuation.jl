@@ -9,7 +9,7 @@ We use this model as a mean to introduce the basics of `MultiParamContinuation.j
 It is easy to encode the manifold using `ManifoldProblem_BK` which yields a `ManifoldProblemBK` with `BifurcationKit` internals.
 
 ```@example TUTSPHEREBK
-using GLMakie, BifurcationKit, MultiParamContinuation
+using CairoMakie, BifurcationKit, MultiParamContinuation
 const MPC = MultiParamContinuation
 
 F(u,p) = [u[1]^2 + u[2]^2 + u[3]^2 - 1]

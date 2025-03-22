@@ -15,7 +15,7 @@ We use this model as a mean to introduce the basics of `MultiParamContinuation.j
 It is easy to encode the manifold as follows
 
 ```@example TUTODE0
-using GLMakie, MultiParamContinuation
+using CairoMakie, MultiParamContinuation
 const MPC = MultiParamContinuation
 
 F(u,p) = [u[3]]
