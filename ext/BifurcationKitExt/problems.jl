@@ -54,7 +54,7 @@ function project_on_M(prob, guess, chart::Chart, wbar, cpar::CoveringPar{T, <: B
             vcat(BK.residual(prob.VF, w, p), Φ' * (w - wbar))
         end
         prob_bls = BifurcationProblem(f, guess, BK.getparams(prob.VF))
-        sol = BK.newton(prob_bls, options)
+        sol = BK.solve(prob_bls, Newton(), options)
     end
     if BK.converged(sol)
         return sol.u
