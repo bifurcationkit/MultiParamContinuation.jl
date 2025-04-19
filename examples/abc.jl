@@ -47,14 +47,14 @@ opts_po_cont = ContinuationPar(dsmax = 0.03, dsmin = 1e-4, ds = 0.0005, max_step
 @reset opts_po_cont.newton_options.tol = 1e-11
 
 br_po = BK.continuation(
-        br, 1, opts_po_cont,
-        PeriodicOrbitOCollProblem(50, 4; update_section_every_step = 1, jacobian = BK.DenseAnalyticalInplace());
-        δp = 0.0001,
-        linear_algo = BK.COPBLS(),
-        verbosity = 1,
-        plot = true,
-        argspo...,
-        normC = norminf)
+    br, 1, opts_po_cont,
+    PeriodicOrbitOCollProblem(50, 4; update_section_every_step = 1, jacobian = BK.DenseAnalyticalInplace());
+    δp = 0.0001,
+    linear_algo = BK.COPBLS(),
+    verbosity = 1,
+    plot = true,
+    argspo...,
+    normC = norminf)
 
 BK.plot(br_po, br)
 ####################################################################################################
@@ -73,17 +73,15 @@ function plot_data!(ax, S; ind_col = 1, fil=x->true, cols = [real(c.index) for c
     # fig[1,2] = cb
 end
 
-using ProgressLogging
-
 function build_mesh!(ax, S; fil=x->true,ind_col = 1)
     neighbors_list = Vector{Int}[]
-    @progress for c in S.atlas
+    for c in S.atlas
         push!(neighbors_list, MPC.true_intersec_list(S, c))
     end
 
     # build faces 
     faces = Vector{Int}[]
-    @progress for c in S.atlas
+    for c in S.atlas
         neighbors = neighbors_list[c.index]
         for n1 in neighbors
             for n2 in neighbors

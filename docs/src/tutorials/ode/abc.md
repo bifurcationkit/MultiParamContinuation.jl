@@ -1,10 +1,5 @@
 # 🟢 ABC problem
 
-```@contents
-Pages = ["abc.md"]
-Depth = 3
-```
-
 The goal of this tutorial is to show how to compute a Manifold from a `BifurcationProblem` as function of two free parameters.
 
 ```@example TUTABC
