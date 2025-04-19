@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>🟢 ABC problem · Multi parameter continuation in Julia</title><meta name="title" content="🟢 ABC problem · Multi parameter continuation in Julia"/><meta property="og:title" content="🟢 ABC problem · Multi parameter continuation in Julia"/><meta property="twitter:title" content="🟢 ABC problem · Multi parameter continuation in Julia"/><meta name="description" content="Documentation for Multi parameter continuation in Julia."/><meta property="og:description" content="Documentation for Multi parameter continuation in Julia."/><meta property="twitter:description" content="Documentation for Multi parameter continuation in Julia."/><script data-outdated-warner src="../../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../../assets/documenter.js"></script><script src="../../../search_index.js"></script><script src="../../../siteinfo.js"></script><script src="../../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../../"><img src="../../../assets/logo.svg" alt="Multi parameter continuation in Julia logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../../../">Multi parameter continuation in Julia</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../../">Home</a></li><li><a class="tocitem" href="../../tutorials/">Tutorials</a></li><li><input class="collapse-toggle" id="menuitem-3" type="checkbox"/><label class="tocitem" for="menuitem-3"><span class="docs-label">Covering methods</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../../henderson/">Henderson</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4" type="checkbox"/><label class="tocitem" for="menuitem-4"><span class="docs-label">Problems</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../../BifProblem/">Manifold Problems</a></li><li><a class="tocitem" href="../../../BifProblemBK/">BifurcationKit</a></li></ul></li><li><a class="tocitem" href="../../../library/">Library</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>🟢 ABC problem</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>🟢 ABC problem</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/bifurcationkit/MultiParamContinuation.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/bifurcationkit/MultiParamContinuation.jl/blob/main/docs/src/tutorials/ode/abc.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="ABC-problem"><a class="docs-heading-anchor" href="#ABC-problem">🟢 ABC problem</a><a id="ABC-problem-1"></a><a class="docs-heading-anchor-permalink" href="#ABC-problem" title="Permalink"></a></h1><ul><li><a href="#ABC-problem">🟢 ABC problem</a></li></ul><p>The goal of this tutorial is to show how to compute a Manifold from a <code>BifurcationProblem</code> as function of two free parameters.</p><pre><code class="language- hljs">using Revise, CairoMakie
+using BifurcationKit, MultiParamContinuation
+
+const BK = BifurcationKit
+const MPC = MultiParamContinuation
+
+function abc!(dz, z, p, t = 0)
+    (;D, B, σ, β, α) = p
+    u1, u2, u3 = z
+    dz[1] = -u1 + D*(1 - u1)*exp(u3)
+    dz[2] = -u2 + D*(1 - u1)*exp(u3) - D*σ*u2*exp(u3)
+    dz[3] = -u3 - β*u3 + D*B*(1 - u1)*exp(u3) + D*B*α*σ*u2*exp(u3)
+    dz
+end
+
+# we group the differentials together
+par_abc = (D = 0.11, B = 8., α = 1., σ = 0.04, β = 1.56)
+z0 = [1., 0., 0. ]
+prob_bk = BifurcationProblem(abc!, z0, par_abc, (@optic _.D), 
+        record_from_solution = (x, p; k...) -&gt; (u3 = x[3], u1 = x[1], u2 = x[2]),)
+
+opts_br = ContinuationPar(p_max = .5, n_inversion = 8, nev = 3)
+br = BK.continuation(prob_bk, PALC(), opts_br; normC = norminf)
+
+fig, ax = BK.plot(br, plotfold=false, )
+fig</code></pre><p>We can also compute the stationary points as function of two free parameters:</p><pre><code class="language- hljs">prob = MPC.ManifoldProblem_BK(
+                        prob_bk, br.sol[1].x, (@optic _.D), (@optic _.β);
+                        record_from_solution = (X, p; k...) -&gt; begin
+                            return (β = X[end], D = X[end-1], u3 = X[3])
+                        end,
+                        finalize_solution = (X,p) -&gt; begin
+                            D = X[end-1]
+                            β = X[end]
+                            keep = (0.01 &lt;= D &lt;= 0.5) &amp;&amp; (1.5 &lt;= β &lt;= 1.65)
+                            return keep
+                        end,
+                        )
+
+S_eq = @time MPC.continuation(prob,
+                        Henderson(np0 = 3,
+                                    θmin = 0.001,
+                                    # use_curvature = true,
+                                    use_tree = true,
+                                  ),
+                        CoveringPar(max_charts = 20000,
+                                max_steps = 1000,
+                                verbose = 0,
+                                newton_options = NewtonPar(tol = 1e-10, verbose = false),
+                                R0 = .04,
+                                ϵ = 0.1,
+                                delta_angle = 10.15,
+                                ))</code></pre><p>You can plot the data as follows</p><pre><code class="language- hljs">function plot_data(S; k...)
+    fig = Figure()
+    ax = Axis3(fig[1,1], zlabel = &quot;u3&quot;, xlabel = &quot;D&quot;, ylabel = &quot;β&quot;, title = &quot;$(length(S)) charts&quot;)
+    plot_data!(ax, S; k...)
+    fig
+end
+
+function plot_data!(ax, S; ind_col = 1, fil=x-&gt;true, cols = [real(c.index) for c in filter(x -&gt; fil(x.u), S.atlas)])
+    pts = mapreduce(c-&gt;[c.data[2], c.data[3], c.data[1]]&#39;, vcat, filter(x -&gt; fil(x.u), S.atlas))
+    cols = [real(c.data[ind_col]) for c in filter(x -&gt; fil(x.u), S.atlas)]
+    hm = scatter!(ax, pts, color = cols)
+end
+
+plot_data(S_eq)</code></pre></article><nav class="docs-footer"><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.10.1 on <span class="colophon-date" title="Saturday 19 April 2025 13:34">Saturday 19 April 2025</span>. Using Julia version 1.11.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
