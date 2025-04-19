@@ -21,7 +21,16 @@ Depth = 1
 
 ## Examples based on BifurcationKit
 
+This tutorial relies on a `BifurcationProblem` to define a sphere, similarly to the above examples.
+
 ```@contents
-Pages = ["ode/sphereBK.md, ode/abc.md"]
+Pages = ["ode/sphereBK.md"]
+Depth = 1
+```
+
+In this tutorial, we continue the equilibrium as function of to free parameters:
+
+```@contents
+Pages = [ode/abc.md"]
 Depth = 1
 ```
