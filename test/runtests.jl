@@ -19,4 +19,5 @@ end
 
 @testset "sphere BifurcationKit" begin
     include("sphere_bk.jl")
+    include("abc.jl")
 end

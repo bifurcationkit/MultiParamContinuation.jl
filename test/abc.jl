@@ -14,13 +14,11 @@ function abc!(dz, z, p, t = 0)
 end
 
 # we group the differentials together
-par_abc = (D = 0.11, B = 8., α = 1., σ = 0.04, β = 1.56)
-z0 = [1., 0., 0. ]
-prob_bk = BifurcationProblem(abc!, z0, par_abc, (@optic _.D), 
+prob_bk = BifurcationProblem(abc!, [1., 0., 0. ], (D = 0.11, B = 8., α = 1., σ = 0.04, β = 1.56), (@optic _.D), 
         record_from_solution = (x, p; k...) -> (u3 = x[3], u1 = x[1], u2 = x[2]),)
 
 opts_br = ContinuationPar(p_max = .5, n_inversion = 8, nev = 3)
-br = BK.continuation(prob_bk, PALC(), opts_br; normC = norminf)
+br = BifurcationKit.continuation(prob_bk, PALC(), opts_br; normC = norminf)
 
 prob = MPC.ManifoldProblem_BK(
                         prob_bk, br.sol[1].x, (@optic _.D), (@optic _.β);
