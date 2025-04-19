@@ -21,4 +21,5 @@ module BifurcationKitExt
                                     CoveringPar
 
     include("problems.jl")
+    include("codim2.jl")
 end

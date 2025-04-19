@@ -26,8 +26,6 @@ prob_bk = BifurcationProblem(abc!, z0, par_abc, (@optic _.D),
 
 opts_br = ContinuationPar(p_max = .5, n_inversion = 8, nev = 3)
 br = BK.continuation(prob_bk, PALC(), opts_br; normC = norminf)
-
-BK.plot(br, plotfold=false)[1]
 ```
 
 We can also compute the stationary points as function of two free parameters:
@@ -73,11 +71,46 @@ function plot_data(S; k...)
     fig
 end
 
-function plot_data!(ax, S; ind_col = 1, fil=x->true, cols = [real(c.index) for c in filter(x -> fil(x.u), S.atlas)])
-    pts = mapreduce(c->[c.data[2], c.data[3], c.data[1]]', vcat, filter(x -> fil(x.u), S.atlas))
-    cols = [real(c.data[ind_col]) for c in filter(x -> fil(x.u), S.atlas)]
+function plot_data!(ax, S; ind = (3,4,5),ind_col = 1, fil=x->true, cols = [real(c.index) for c in filter(x -> fil(x.u), S.atlas)])
+    pts = mapreduce(c->[c.u[ind[1]], c.u[ind[2]], c.u[ind[3]]]', vcat, filter(x -> fil(x.u), S.atlas))
     hm = scatter!(ax, pts, color = cols)
 end
 
 plot_data(S_eq)
+```
+
+## Surface of Hopf points as function of 3 parameters
+
+```@example TUTABC
+opts_cover = CoveringPar(max_charts = 1000,
+    max_steps = 500,
+    verbose = 1,
+    newton_options = NewtonPar(tol = 1e-11, verbose = false),
+    R0 = .31,
+    ϵ = 0.15,
+    # delta_angle = 10.15,
+    )
+
+atlas_hopf = @time MPC.continuation(deepcopy(br), 1, 
+    (@optic _.α), (@optic _.β), 
+    opts_cover;
+    finalize_solution = (X,p;k...) -> begin
+        D = X[4]
+        α = X[5]
+        β = X[6]
+        return true
+    end,
+    alg = Henderson(np0 = 5,
+                θmin = 0.001,
+                use_curvature = false,
+                use_tree = true,
+            ),
+    )
+```
+
+```@example TUTABC
+fig = Figure()
+ax = Axis3(fig[1,1], zlabel = "β", xlabel = "D", ylabel = "α", title = "Hopf surface $(length(atlas_hopf)) charts")
+plot_data!(ax, atlas_hopf, ind = (4,5,6))
+fig
 ```

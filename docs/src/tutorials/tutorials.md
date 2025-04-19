@@ -28,7 +28,7 @@ Pages = ["ode/sphereBK.md"]
 Depth = 1
 ```
 
-In this tutorial, we continue the equilibrium as function of to free parameters:
+In this tutorial, we continue solutions (equilibria, Hopf points, periodic orbits) as function of to free parameters:
 
 ```@contents
 Pages = ["ode/abc.md"]
