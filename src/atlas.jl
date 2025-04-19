@@ -15,9 +15,9 @@ $TYPEDFIELDS
 
 """
 mutable struct Chart{Tu, Ttg, Tr, Tp, Tin, Td, Teve, Tl}
-    "Base point"
+    "Base point, solution of F(x) = 0"
     const u::Tu
-    "Tangent space"
+    "Tangent space at u"
     const Φ::Ttg
     "Radius for region of validity (Ball)."
     R::Tr # modified by curvature
@@ -96,7 +96,7 @@ $TYPEDFIELDS
 
 - `length(a::Atlas)` returns the number of charts
 
-- `a[3]` returns the 3rd chart in the atlas `a`
+- `a[3]` returns the 3rd chart in the atlas `a`, see `?Chart`
 
 """
 struct Atlas{dim, Tc, Talg, Ttree}

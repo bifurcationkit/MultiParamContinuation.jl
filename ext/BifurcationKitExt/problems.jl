@@ -2,6 +2,8 @@ using ForwardDiff
 
 """
 $SIGNATURES
+
+Make a manifold problem from a `BifurcationProblem`.
 """
 function ManifoldProblem_BK(F, u0, par;
                         check_dim::Bool = true,
@@ -38,6 +40,105 @@ function correct_guess(cache, options::BK.NewtonPar)
         throw("Newton for first point did not converge!!")
     end
     return sol.u
+end
+
+##############################################################################################################
+"""
+$SIGNATURES
+
+Create a BifurcationProblem with two parameter axes for which we continue the zeros.
+"""
+struct BifurcationProblem_2P{T1, T2, T3}
+    prob::T1
+    lens1::T2
+    lens2::T3
+end
+
+function (pb::BifurcationProblem_2P)(Z, par)
+    u = @view Z[1:end-2]
+    p1 = Z[end-1]
+    p2 = Z[end]
+    par2 = BK._set(par, (pb.lens1, pb.lens2), (p1, p2))
+    BK.residual(pb.prob, u, par2)
+end
+
+function jacobian(pb::BifurcationProblem_2P, Z, par)
+    u = @view Z[1:end-2]
+    p1 = Z[end-1]
+    p2 = Z[end]
+    par2 = BK._set(par, (pb.lens1, pb.lens2), (p1, p2))
+    # @error (@which BK._get_matrix(BK.jacobian(pb.prob, u, par2)))
+    J0 = BK._get_matrix(BK.jacobian(pb.prob, u, par2))
+    l1 = ForwardDiff.derivative(z -> pb((@set Z[end-1] = z), par), Z[end-1])
+    l2 = ForwardDiff.derivative(z -> pb((@set Z[end] = z),   par), Z[end])
+    hcat(J0, l1, l2)
+end
+
+##############################################################################################################
+struct _A{T1, T2, T3, T4}
+    prob::T1
+    Φ::T2
+    Φwbar::T3
+    wbar::T4
+end
+
+function (pb::_A)(w, p)
+    vcat(BK.residual(pb.prob.VF, w, p), pb.Φ' * (w - pb.wbar))
+end
+
+function jacobian(pb::_A, w, p)
+    J0 = BK.jacobian(pb.prob, w, p)
+    vcat(J0, pb.Φ')
+end
+
+"""
+$SIGNATURES
+
+Make a manifold problem from a `BifurcationProblem` and specifying two parameter axes.
+"""
+function ManifoldProblem_BK(prob_bk::BK.AbstractBifurcationProblem,
+                            u0, 
+                            lens1, 
+                            lens2;
+                            check_dim::Bool = true,
+                            record_from_solution = (u,p;k...) -> nothing,
+                            project = nothing,
+                            get_radius = get_radius_default,
+                            get_tangent = nothing,
+                            event_function = event_default,
+                            finalize_solution = finalize_default)
+    par = prob_bk.params
+    m = length(BK.residual(prob_bk, prob_bk.u0, par))
+
+    # make a bifurcation problem with two parameters axes
+    pb_composite = BifurcationProblem_2P(prob_bk, lens1, lens2)
+    new_u0 = vcat(u0, BK._get(par, lens1), BK._get(par, lens2))
+
+    prob_mpc = BifurcationProblem(pb_composite, 
+                    new_u0, 
+                    par, 
+                    (@optic _); 
+                    J = (x, p) -> jacobian(pb_composite, x, p)
+                    )
+    𝒯 = eltype(new_u0)
+    Φ = zeros(𝒯, m+2, 2)
+    wbar = zeros(𝒯, m+2)
+    prob_cons = _A(prob_mpc, Φ, Φ' * wbar, wbar)
+
+    ManifoldProblemBK(
+                        prob_mpc,
+                        new_u0, 
+                        par;
+                        m,
+                        check_dim,
+                        record_from_solution,
+                        project,
+                        get_radius,
+                        get_tangent,
+                        event_function,
+                        finalize_solution,
+                        prob_cons,
+                    )
 end
 
 ##############################################################################################################
