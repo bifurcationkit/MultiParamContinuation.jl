@@ -8,7 +8,7 @@ Depth = 3
 The goal of this tutorial is to show how to compute a Manifold from a `BifurcationProblem` as function of two free parameters.
 
 ```@example TUTABC
-using Revise, CairoMakie
+using CairoMakie
 using BifurcationKit, MultiParamContinuation
 
 const BK = BifurcationKit
