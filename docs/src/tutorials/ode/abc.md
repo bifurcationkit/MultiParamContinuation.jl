@@ -26,6 +26,8 @@ prob_bk = BifurcationProblem(abc!, z0, par_abc, (@optic _.D),
 
 opts_br = ContinuationPar(p_max = .5, n_inversion = 8, nev = 3)
 br = BK.continuation(prob_bk, PALC(), opts_br; normC = norminf)
+
+BK.plot(br, plotfold=false)[1]
 ```
 
 We can also compute the stationary points as function of two free parameters:
