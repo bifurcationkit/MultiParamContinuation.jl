@@ -22,6 +22,6 @@ Depth = 1
 ## Examples based on BifurcationKit
 
 ```@contents
-Pages = ["ode/sphereBK.md"]
+Pages = ["ode/sphereBK.md, ode/abc.md"]
 Depth = 1
 ```
