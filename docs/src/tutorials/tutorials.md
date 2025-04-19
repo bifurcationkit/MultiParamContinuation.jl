@@ -31,6 +31,6 @@ Depth = 1
 In this tutorial, we continue the equilibrium as function of to free parameters:
 
 ```@contents
-Pages = [ode/abc.md"]
+Pages = ["ode/abc.md"]
 Depth = 1
 ```
