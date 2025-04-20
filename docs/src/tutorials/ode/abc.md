@@ -24,7 +24,7 @@ z0 = [1., 0., 0. ]
 prob_bk = BifurcationProblem(abc!, z0, par_abc, (@optic _.D), 
         record_from_solution = (x, p; k...) -> (u3 = x[3], u1 = x[1], u2 = x[2]),)
 
-opts_br = ContinuationPar(p_max = .5, n_inversion = 8, nev = 3)
+opts_br = ContinuationPar(p_max = 1.5, n_inversion = 8, nev = 3)
 br = BK.continuation(prob_bk, PALC(), opts_br; normC = norminf)
 ```
 
@@ -83,8 +83,8 @@ plot_data(S_eq)
 
 ```@example TUTABC
 opts_cover = CoveringPar(max_charts = 1000,
-    max_steps = 500,
-    verbose = 1,
+    max_steps = 600,
+    # verbose = 1,
     newton_options = NewtonPar(tol = 1e-11, verbose = false),
     R0 = .31,
     ϵ = 0.15,
@@ -94,12 +94,6 @@ opts_cover = CoveringPar(max_charts = 1000,
 atlas_hopf = @time MPC.continuation(deepcopy(br), 1, 
     (@optic _.α), (@optic _.β), 
     opts_cover;
-    finalize_solution = (X,p;k...) -> begin
-        D = X[4]
-        α = X[5]
-        β = X[6]
-        return true
-    end,
     alg = Henderson(np0 = 5,
                 θmin = 0.001,
                 use_curvature = false,
