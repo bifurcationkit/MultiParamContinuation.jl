@@ -165,7 +165,7 @@ br_po = BK.continuation(
     PeriodicOrbitOCollProblem(50, 4; update_section_every_step = 1, jacobian = BK.DenseAnalyticalInplace());
     δp = 0.0001,
     linear_algo = BK.COPBLS(),
-    verbosity = 1,
+    # verbosity = 1,
     plot = true,
     argspo...,
     normC = norminf)

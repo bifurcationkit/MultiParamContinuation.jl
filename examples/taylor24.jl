@@ -19,7 +19,7 @@ end
 
 prob = ManifoldProblem(F, [0.2,0.2,-0.,0], nothing;
             finalize_solution = ProductSpace([-5,-5,-1,-1],[5,5,1,1]),
-            recordFromSolution = (u,p) -> [u[3],u[4],u[1]/2+u[2]/2]
+            record_from_solution = (u,p;k...) -> [u[3],u[4],u[1]/2+u[2]/2]
 )
 
 S = continuation(prob,

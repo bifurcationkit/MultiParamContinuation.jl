@@ -268,7 +268,7 @@ function generate_new_chart(Ω::Atlas; id = length(Ω) + 1)
         # distance from guess to projected point
         dst = norm(new_chart.u .- (c.u .+ c.Φ * ω), Inf)
         # angle between tangent spaces, do not compute if delta_angle large enough
-        δα = delta_angle > pi ? 0 : abs(largest_principal_angle(c.Φ, new_chart.Φ))
+        δα = delta_angle > pi ? zero(delta_angle) : abs(largest_principal_angle(c.Φ, new_chart.Φ))
         if δα > delta_angle ||
                     dst > ϵ
             verbose && @error "Reduction"  δα dst cache.θ

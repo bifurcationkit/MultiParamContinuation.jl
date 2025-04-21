@@ -39,7 +39,7 @@ mutable struct Chart{Tu, Ttg, Tr, Tp, Tin, Td, Teve, Tl}
     neighbors::Vector{Int}
 end
 
-@inline is_inside_ball(c::Chart, P) = norm(P) <= c.R
+@inline is_inside_ball(c::Chart, P) = norm(P, 2) <= c.R
 
 function is_on_boundary(c::Chart)
     c.interior = ~all(c.inside_ball)

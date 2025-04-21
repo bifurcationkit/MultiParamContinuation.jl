@@ -21,7 +21,7 @@ prob = ManifoldProblem(F, [0.,0,-0.1], nothing;
             event_function,
             finalize_solution = Cube(20.1))
 
-S = continuation(prob,
+S = MPC.continuation(prob,
             Henderson(np0 = 6, 
                       θmin = 0.01,
                       θmax = 1.5,

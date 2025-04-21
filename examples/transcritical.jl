@@ -11,7 +11,7 @@ using MultiParamContinuation
 
 const MPC = MultiParamContinuation
 
-function F(u,p) 
+function F(u,p)
     x,y,z = u
     [(z-x-.5*(y-1)*(y-1))*(x+y+z) + y/10]
 end
