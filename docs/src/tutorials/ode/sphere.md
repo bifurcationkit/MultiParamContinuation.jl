@@ -21,7 +21,7 @@ const MPC = MultiParamContinuation
 F(u,p) = [u[1]^2 + u[2]^2 + u[3]^2 - 1]
 
 prob = ManifoldProblem(F, 
-                    [1,0.,0.],
+                    [1.,0,0],
                     nothing
                         )
 ```

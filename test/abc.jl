@@ -57,3 +57,13 @@ atlas_hopf = @time MPC.continuation(deepcopy(br), 1,
                 use_tree = true,
             ),
     )
+
+# test plotting
+using CairoMakie
+MPC.plotd(S_eq)
+MPC.plot2d(S_eq)
+MPC.plotcenters(S_eq)
+
+f=Figure(); ax = Axis(f[1,1])
+MPC.plotkd!(ax, S_eq.tree, S_eq)
+f

@@ -70,7 +70,7 @@ end
 function init_polygonal_boundary(N, R) 
     v = R / cospi(1/N)
     return [@SVector [cospi(2*(i-1)/N) * v,
-             sinpi(2*(i-1)/N) * v] for i in Base.OneTo(N)]
+                      sinpi(2*(i-1)/N) * v] for i in Base.OneTo(N)]
 end
 
 function get_alpha(c1::Chart, c2::Chart)
@@ -127,6 +127,7 @@ function new_atlas(c::Tc, cache::Talg = nothing; dim::Int = 2) where {Tu, Ttg, T
     return Ω
 end
 
+# add chart to atlas
 function add!(Ω::Atlas, c::Chart)
     push!(Ω.atlas, c)
     if use_tree(Ω)
@@ -183,7 +184,10 @@ function intersec_list(Ω::Atlas, c::Chart, use_tree_bool::Bool = use_tree(Ω))
     return Jᵢᵐ
 end
 
-# function mainly for plotting
+"""
+
+Function mainly for plotting.
+"""
 function test_P(charti::Chart, chartj::Chart)
     ui = charti.u
     Ri = charti.R
