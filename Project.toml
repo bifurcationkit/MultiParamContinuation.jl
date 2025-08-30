@@ -26,9 +26,9 @@ BifurcationKitExt = "BifurcationKit"
 MakieExt = "Makie"
 
 [compat]
-BifurcationKit = "^0.4"
-Makie = "^0.21, ^0.22"
-julia = "1.9, 1.10"
+BifurcationKit = "^0.4, ^0.5"
+Makie = "^0.21, ^0.22, ^0.23, ^0.24"
+julia = "1.9, 1.10, 1.11"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

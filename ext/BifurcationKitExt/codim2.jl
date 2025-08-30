@@ -11,7 +11,7 @@ function continuation(br::BK.ContResult,
                         record_from_solution = BK.record_sol_default,
                         options_cont_bk::ContinuationPar = br.contparams,
                         finalize_solution = (X,p) -> true,
-                        jacobian_ma = :MinAugMatrixBased
+                        jacobian_ma = BK.MinAugMatrixBased()
                         )
     if lens3 == lens2 || BK.getlens(BK.getprob(br)) in (lens2, lens3)
         error("You must pass different lenses")
