@@ -6,4 +6,4 @@ MultiParamContinuation = "f08f8c4f-38fd-45fe-94e7-4d39a6d709c5"
 
 [compat]
 Documenter = "0.27,^1.0"
-BifurcationKit = "^0.4"
+BifurcationKit = "^0.4, ^0.5"
