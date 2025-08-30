@@ -83,7 +83,7 @@ plot_data(S_eq)
 
 ```@example TUTABC
 opts_cover = CoveringPar(max_charts = 1000,
-    max_steps = 600,
+    max_steps = 100,
     # verbose = 1,
     newton_options = NewtonPar(tol = 1e-11, verbose = false),
     R0 = .31,
@@ -111,7 +111,7 @@ fig
 
 ## Surface of Periodic orbits as function of 2 parameters
 
-We trace the curve of periodic orbits from a Hopf point: 
+We trace the curve of periodic orbits from a Hopf point. Note that this can be improved a lot using the linear solver `BK.COPBLS`, we do not do it here to simplify the code.
 
 ```@example TUTABC
 argspo = (record_from_solution = (x, p; k...) -> begin
@@ -134,6 +134,12 @@ br_po = BK.continuation(
     δp = 0.0001,
     argspo...,
     normC = norminf)
+```
+
+```@example TUTABC
+f, ax = BK.plot(br, br_po, branchlabel = ["equilibria","periodic orbits"])
+xlims!(ax, (0.1,0.4))
+f
 ```
 
 We can now compute the manifold
