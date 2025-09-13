@@ -28,10 +28,6 @@ opts_br = ContinuationPar(p_max = 1.5, n_inversion = 8, nev = 3)
 br = BK.continuation(prob_bk, PALC(), opts_br; normC = norminf)
 ```
 
-```@example TUTABC
-BK.plot(br)[1]
-```
-
 We can also compute the stationary points as function of two free parameters:
 
 
