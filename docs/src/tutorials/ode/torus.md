@@ -8,7 +8,7 @@ It is easy to encode the manifold as follows
 using CairoMakie, MultiParamContinuation
 const MPC = MultiParamContinuation
 
-function F(u,p)
+function F(u, p)
     x,y,z = u
     R2 = 0.5
     R1 = 0.8
@@ -44,5 +44,5 @@ f = MPC.plotd(S;
     draw_tangent = true, 
     draw_edges = true,
     plot_center = false,
-    ind_plot = [1,3])
+    )
 ```

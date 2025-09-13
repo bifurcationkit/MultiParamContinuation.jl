@@ -33,7 +33,7 @@ S = MPC.continuation(prob,
                     newton_options = NonLinearSolveSpec(;maxiters = 5, abstol = 1e-12),
                     R0 = .25,
                     ϵ = 0.025,
-                    delta_angle = 0.1,
+                    # delta_angle = 0.1,
                     ))
 
 MPC.plotd(S; 

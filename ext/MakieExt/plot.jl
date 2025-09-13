@@ -15,7 +15,7 @@ $SIGNATURES
 - `plot_center = true`, plot the center of the charts
 - `put_ids = false` add the indices of the charts
 - `draw_frame = false` plot the local frame on the tangent space
-- `ind_plot = 1:2` indices used to plot in the 2d space
+- `ind_plot = (1,2,3)` indices from `u` to plot
 """
 function plotd(ax, chart::Chart; 
                 ind = 1,
@@ -28,8 +28,9 @@ function plotd(ax, chart::Chart;
                 plot_center = false,
                 draw_edges = false,
                 record_from_solution = (u, p; k...) -> u,
+                ind_plot = (1,2,3),
                 k...)
-    u0 = isnothing(chart.data) ? chart.u : chart.data
+    u0 = chart.u#isnothing(chart.data) ? chart.u : chart.data
     T = chart.Φ
     R = chart.R
 
@@ -37,22 +38,21 @@ function plotd(ax, chart::Chart;
         Φ = s -> u0 .+ T * s
         Pt = mapreduce(Φ, hcat, chart.P)
         Pt = hcat(Pt, Φ(chart.P[1]))
-
         _color = is_on_boundary(chart) ? HSV(40,30,60) : HSV(200, 50, 50)
         _color = chart.label == Symbol() ? _color :  :red 
 
-        points2d = map(x -> Point2f(x[1], x[2]), eachcol(Pt))
+        points2d = map(x -> Point2f(x[ind_plot[1]], x[ind_plot[2]]), eachcol(Pt))
         faces = Makie.GeometryBasics.earcut_triangulate([points2d])
-        mesh!(ax, Pt[1:3,:], faces; label = nothing, alpha = 1, color = _color, colorrange)
+        mesh!(ax, Pt[[ind_plot[1],ind_plot[2],ind_plot[3]], :], faces; label = nothing, alpha = 1, color = _color, colorrange)
         if draw_edges
-            @views lines!(ax, Pt[1,:], Pt[2,:], Pt[3,:]; label = nothing, color = :black, colorrange)
+            @views lines!(ax, Pt[ind_plot[1], :], Pt[ind_plot[2], :], Pt[ind_plot[3], :]; label = nothing, color = :black, colorrange)
         end
     end
 
     # plots draw_circle
     if draw_circle
         Pt = mapreduce(Φ, hcat, [R .* [cos(θ), sin(θ)] for θ in LinRange(0,2pi, 100)])
-        @views lines!(ax, Pt[1,:], Pt[2,:], Pt[3,:]; label = nothing, color = ind, colorrange, k...)
+        @views lines!(ax, Pt[ind_plot[1],:], Pt[ind_plot[2],:], Pt[ind_plot[3],:]; label = nothing, color = ind, colorrange, k...)
     end
 
     us = get_tangent(T, 1)
@@ -69,10 +69,10 @@ function plotd(ax, chart::Chart;
     end
 
     if plot_center ||  chart.index == colorrange[end]
-        scatter!(ax, [u0[1]], [u0[2]], [u0[3]]; label = "$ind", color = ind, colorrange)
+        scatter!(ax, [u0[ind_plot[1]]], [u0[ind_plot[2]]], [u0[ind_plot[3]]]; label = "$ind", color = ind, colorrange)
     end
     if put_ids
-        text!(ax, [u0[1]], [u0[2] + 0.005], [u0[3] + 0.005], text = "$ind")
+        text!(ax, [u0[ind_plot[1]]], [u0[ind_plot[2]] + 0.005], [u0[ind_plot[3]] + 0.005], text = "$ind")
     end
     ax
 end

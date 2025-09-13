@@ -28,6 +28,10 @@ opts_br = ContinuationPar(p_max = 1.5, n_inversion = 8, nev = 3)
 br = BK.continuation(prob_bk, PALC(), opts_br; normC = norminf)
 ```
 
+```@example TUTABC
+BK.plot(br)[1]
+```
+
 We can also compute the stationary points as function of two free parameters:
 
 
@@ -52,7 +56,7 @@ S_eq = @time MPC.continuation(prob,
                                     use_tree = true,
                                   ),
                         CoveringPar(max_charts = 20000,
-                                max_steps = 1000,
+                                max_steps = 10000,
                                 verbose = 0,
                                 newton_options = NewtonPar(tol = 1e-10),
                                 R0 = .04,
@@ -66,9 +70,9 @@ You can plot the data as follows
 ```@example TUTABC
 function plot_data(S; k...)
     fig = Figure()
-    ax = Axis3(fig[1,1], zlabel = "u3", xlabel = "D", ylabel = "β", title = "$(length(S)) charts")
+    ax = Axis3(fig[1,1], zlabel = "β", xlabel = "u₃", ylabel = "D", title = "$(length(S)) charts")
     plot_data!(ax, S; k...)
-    fig
+    fig, ax
 end
 
 function plot_data!(ax, S; ind = (3,4,5),ind_col = 1, fil=x->true, cols = [real(c.index) for c in filter(x -> fil(x.u), S.atlas)])
@@ -76,19 +80,33 @@ function plot_data!(ax, S; ind = (3,4,5),ind_col = 1, fil=x->true, cols = [real(
     hm = scatter!(ax, pts, color = cols)
 end
 
-plot_data(S_eq)
+f, ax = plot_data(S_eq)
+f
+```
+
+or using the function `MPC.plotd`
+
+```@example TUTABC
+fig = Figure()
+ax = Axis3(fig[1,1], zlabel = "β", xlabel = "u₃", ylabel = "D", title = "$(length(S_eq)) charts")
+MPC.plotd(ax, S_eq; 
+    draw_tangent = true, 
+    plot_center = false,
+    draw_edges = false,
+    ind_plot = (3,4,5)
+    )
+fig
 ```
 
 ## Surface of Hopf points as function of 3 parameters
 
 ```@example TUTABC
 opts_cover = CoveringPar(max_charts = 1000,
-    max_steps = 100,
+    max_steps = 1000,
     # verbose = 1,
     newton_options = NewtonPar(tol = 1e-11, verbose = false),
-    R0 = .31,
+    R0 = .1,
     ϵ = 0.15,
-    # delta_angle = 10.15,
     )
 
 atlas_hopf = @time MPC.continuation(deepcopy(br), 1, 
@@ -104,8 +122,14 @@ atlas_hopf = @time MPC.continuation(deepcopy(br), 1,
 
 ```@example TUTABC
 fig = Figure()
-ax = Axis3(fig[1,1], zlabel = "β", xlabel = "D", ylabel = "α", title = "Hopf surface $(length(atlas_hopf)) charts")
-plot_data!(ax, atlas_hopf, ind = (4,5,6))
+ax = Axis3(fig[1,1], zlabel = "β", xlabel = "D", ylabel = "α", title = "$(length(atlas_hopf)) charts")
+
+MPC.plotd(ax, atlas_hopf; 
+    draw_tangent = true, 
+    plot_center = false,
+    draw_edges = true,
+    ind_plot = (4, 5, 6)
+    )
 fig
 ```
 
@@ -114,7 +138,7 @@ fig
 We trace the curve of periodic orbits from a Hopf point. Note that this can be improved a lot using the linear solver `BK.COPBLS`, we do not do it here to simplify the code.
 
 ```@example TUTABC
-argspo = (record_from_solution = (x, p; k...) -> begin
+ argspo = (record_from_solution = (x, p; k...) -> begin
                 xtt = BK.get_periodic_orbit(p.prob, x, p.p)
                 return (max = maximum(xtt[3,:]), min = minimum(xtt[3,:]), period = x[end])
             end,
@@ -137,7 +161,7 @@ br_po = BK.continuation(
 ```
 
 ```@example TUTABC
-f, ax = BK.plot(br, br_po, branchlabel = ["equilibria","periodic orbits"])
+f, ax = BK.plot(br, br_po, branchlabel = ["equilibria", "periodic orbits"])
 xlims!(ax, (0.1,0.4))
 f
 ```
@@ -146,7 +170,7 @@ We can now compute the manifold
 
 ```@example TUTABC
 using LinearAlgebra
-const coll = br_po.prob
+const coll = br_po.prob # I know! This is not very good...
 
 prob = MPC.ManifoldProblem_BK(
                         br_po.prob, br_po.sol[1].x, (@optic _.D), (@optic _.β),
@@ -159,7 +183,7 @@ prob = MPC.ManifoldProblem_BK(
                             D = X[end-1]
                             β = X[end]
                             keep = (0.1 <= D <= 0.5) && (1.5 <= β <= 1.65)
-                            return keep #&& norm(X) < 10
+                            return keep
                         end,
                         )
 
@@ -172,7 +196,7 @@ S_po = @time MPC.continuation(prob,
                                 max_steps = 200,
                                 verbose = 1,
                                 newton_options = NewtonPar(tol = 1e-10, verbose = false),
-                                R0 = .95,
+                                R0 = .5,
                                 ϵ = 0.4,
                                 delta_angle = 4pi,
                                 )
@@ -181,8 +205,22 @@ S_po = @time MPC.continuation(prob,
 
 ```@example TUTABC
 fig = Figure()
-ax3 = Axis3(fig[1,1], zlabel = "u3", xlabel = "D", ylabel = "β", title = "PO $(length(S_po)) charts")
-pts = mapreduce(c->[c.data[1], c.data[3], c.data[4]]', vcat, S_po.atlas)
+ax3 = Axis3(fig[1,1], xlabel = "period", ylabel = "D", zlabel = "β", title = "PO $(length(S_po)) charts")
+pts = mapreduce(c->[c.data.period, c.data.D, c.data.β ]', vcat, S_po.atlas)
 scatter!(ax3, pts, color = [c.data[2] for c in S_po.atlas])
+fig
+```
+
+or
+
+```@example TUTABC
+fig = Figure()
+ax3 = Axis3(fig[1,1], zlabel = "β", xlabel = "period", ylabel = "D", title = "PO $(length(S_po)) charts")
+MPC.plotd(ax3, S_po; 
+    draw_tangent = true, 
+    plot_center = false,
+    draw_edges = false,
+    ind_plot = (604,605,606)
+    )
 fig
 ```

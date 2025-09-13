@@ -46,5 +46,5 @@ MPC.plotd(S;
     draw_tangent = true, 
     plot_center = false,
     draw_edges = true,
-    ind_plot = [1,3])
+    )
 ```

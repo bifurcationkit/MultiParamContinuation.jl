@@ -1,5 +1,9 @@
 # Library
 
+```@meta
+CollapsedDocStrings = true
+```
+
 ```@contents
 Pages = ["library.md"]
 Depth = 3

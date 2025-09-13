@@ -177,8 +177,8 @@ BK.plot(br_po, br)
                         finalize_solution = (X,p) -> begin
                             D = X[end-1]
                             β = X[end]
-                            keep = (0.01 <= D <= 0.5) && (1.5 <= β <= 1.65)
-                            return keep
+                            keep = (0.1 <= D <= 0.5) && (1.5 <= β <= 1.65)
+                            return keep #&& norm(X) < 10
                         end,
                         )
 

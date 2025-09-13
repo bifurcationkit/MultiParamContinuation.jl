@@ -20,7 +20,7 @@ end
 
 prob = ManifoldProblem(F, [1,1,0.], nothing)
 
-S = @time continuation(prob,
+S = @time MPC.continuation(prob,
             Henderson(np0 = 4),
             CoveringPar(max_charts = 1500, 
                     max_steps = 2000,
@@ -40,7 +40,7 @@ f = MPC.plotd(S;
     ind_plot = [1,3])
 
 MPC.plot2d(S; 
-draw_circle = true, 
+    draw_circle = true, 
     draw_tangent = true, 
     plot_center = true,
     put_ids = true,

@@ -18,7 +18,7 @@ It is easy to encode the manifold as follows
 using CairoMakie, MultiParamContinuation
 const MPC = MultiParamContinuation
 
-F(u,p) = [u[1]^2 + u[2]^2 + u[3]^2 - 1]
+F(u, p) = [u[1]^2 + u[2]^2 + u[3]^2 - 1]
 
 prob = ManifoldProblem(F, 
                     [1.,0,0],
@@ -50,7 +50,7 @@ You plot the result as follows
 ```@example TUTSPHERE
 MPC.plotd(S; 
     draw_tangent = true, 
-    plot_center = false,
+    plot_center = true,
     draw_edges = true,
-    ind_plot = [1,3])
+    )
 ```

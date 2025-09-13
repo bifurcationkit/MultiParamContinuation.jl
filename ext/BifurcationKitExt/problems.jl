@@ -97,7 +97,7 @@ $SIGNATURES
 Make a manifold problem from a `BifurcationProblem` and specifying two parameter axes.
 """
 function ManifoldProblem_BK(prob_bk::BK.AbstractBifurcationProblem,
-                            u0, 
+                            u0::AbstractVector, 
                             lens1, 
                             lens2;
                             check_dim::Bool = true,
