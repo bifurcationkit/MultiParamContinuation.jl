@@ -53,20 +53,20 @@ S_eq = @time MPC.continuation(prob,
                                     use_tree = true,
                                   ),
                         CoveringPar(max_charts = 20000,
-                                max_steps = 1000,
+                                max_steps = 10000,
                                 verbose = 0,
                                 newton_options = NewtonPar(tol = 1e-10),
                                 R0 = .04,
                                 ϵ = 0.1,
                                 delta_angle = 10.15,
                                 ))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Surface 2-d
-   ├─ # charts = 775
+   ├─ # charts = 771
    └─ problem = 
 </code></pre><p>You can plot the data as follows</p><pre><code class="language-julia hljs">function plot_data(S; k...)
     fig = Figure()
-    ax = Axis3(fig[1,1], zlabel = &quot;u3&quot;, xlabel = &quot;D&quot;, ylabel = &quot;β&quot;, title = &quot;$(length(S)) charts&quot;)
+    ax = Axis3(fig[1,1], zlabel = &quot;β&quot;, xlabel = &quot;u₃&quot;, ylabel = &quot;D&quot;, title = &quot;$(length(S)) charts&quot;)
     plot_data!(ax, S; k...)
-    fig
+    fig, ax
 end
 
 function plot_data!(ax, S; ind = (3,4,5),ind_col = 1, fil=x-&gt;true, cols = [real(c.index) for c in filter(x -&gt; fil(x.u), S.atlas)])
@@ -74,13 +74,21 @@ function plot_data!(ax, S; ind = (3,4,5),ind_col = 1, fil=x-&gt;true, cols = [re
     hm = scatter!(ax, pts, color = cols)
 end
 
-plot_data(S_eq)</code></pre><img src="7f23ce34.png" alt="Example block output"/><h2 id="Surface-of-Hopf-points-as-function-of-3-parameters"><a class="docs-heading-anchor" href="#Surface-of-Hopf-points-as-function-of-3-parameters">Surface of Hopf points as function of 3 parameters</a><a id="Surface-of-Hopf-points-as-function-of-3-parameters-1"></a><a class="docs-heading-anchor-permalink" href="#Surface-of-Hopf-points-as-function-of-3-parameters" title="Permalink"></a></h2><pre><code class="language-julia hljs">opts_cover = CoveringPar(max_charts = 1000,
-    max_steps = 100,
+f, ax = plot_data(S_eq)
+f</code></pre><img src="fc238ffd.png" alt="Example block output"/><p>or using the function <code>MPC.plotd</code></p><pre><code class="language-julia hljs">fig = Figure()
+ax = Axis3(fig[1,1], zlabel = &quot;β&quot;, xlabel = &quot;u₃&quot;, ylabel = &quot;D&quot;, title = &quot;$(length(S_eq)) charts&quot;)
+MPC.plotd(ax, S_eq;
+    draw_tangent = true,
+    plot_center = false,
+    draw_edges = false,
+    ind_plot = (3,4,5)
+    )
+fig</code></pre><img src="64ebe48b.png" alt="Example block output"/><h2 id="Surface-of-Hopf-points-as-function-of-3-parameters"><a class="docs-heading-anchor" href="#Surface-of-Hopf-points-as-function-of-3-parameters">Surface of Hopf points as function of 3 parameters</a><a id="Surface-of-Hopf-points-as-function-of-3-parameters-1"></a><a class="docs-heading-anchor-permalink" href="#Surface-of-Hopf-points-as-function-of-3-parameters" title="Permalink"></a></h2><pre><code class="language-julia hljs">opts_cover = CoveringPar(max_charts = 1000,
+    max_steps = 1000,
     # verbose = 1,
     newton_options = NewtonPar(tol = 1e-11, verbose = false),
-    R0 = .31,
+    R0 = .1,
     ϵ = 0.15,
-    # delta_angle = 10.15,
     )
 
 atlas_hopf = @time MPC.continuation(deepcopy(br), 1,
@@ -92,12 +100,18 @@ atlas_hopf = @time MPC.continuation(deepcopy(br), 1,
                 use_tree = true,
             ),
     )</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Surface 2-d
-   ├─ # charts = 100
+   ├─ # charts = 1000
    └─ problem = 
 </code></pre><pre><code class="language-julia hljs">fig = Figure()
-ax = Axis3(fig[1,1], zlabel = &quot;β&quot;, xlabel = &quot;D&quot;, ylabel = &quot;α&quot;, title = &quot;Hopf surface $(length(atlas_hopf)) charts&quot;)
-plot_data!(ax, atlas_hopf, ind = (4,5,6))
-fig</code></pre><img src="5aaba0a4.png" alt="Example block output"/><h2 id="Surface-of-Periodic-orbits-as-function-of-2-parameters"><a class="docs-heading-anchor" href="#Surface-of-Periodic-orbits-as-function-of-2-parameters">Surface of Periodic orbits as function of 2 parameters</a><a id="Surface-of-Periodic-orbits-as-function-of-2-parameters-1"></a><a class="docs-heading-anchor-permalink" href="#Surface-of-Periodic-orbits-as-function-of-2-parameters" title="Permalink"></a></h2><p>We trace the curve of periodic orbits from a Hopf point. Note that this can be improved a lot using the linear solver <code>BK.COPBLS</code>, we do not do it here to simplify the code.</p><pre><code class="language-julia hljs">argspo = (record_from_solution = (x, p; k...) -&gt; begin
+ax = Axis3(fig[1,1], zlabel = &quot;β&quot;, xlabel = &quot;D&quot;, ylabel = &quot;α&quot;, title = &quot;$(length(atlas_hopf)) charts&quot;)
+
+MPC.plotd(ax, atlas_hopf;
+    draw_tangent = true,
+    plot_center = false,
+    draw_edges = true,
+    ind_plot = (4, 5, 6)
+    )
+fig</code></pre><img src="f7d20c65.png" alt="Example block output"/><h2 id="Surface-of-Periodic-orbits-as-function-of-2-parameters"><a class="docs-heading-anchor" href="#Surface-of-Periodic-orbits-as-function-of-2-parameters">Surface of Periodic orbits as function of 2 parameters</a><a id="Surface-of-Periodic-orbits-as-function-of-2-parameters-1"></a><a class="docs-heading-anchor-permalink" href="#Surface-of-Periodic-orbits-as-function-of-2-parameters" title="Permalink"></a></h2><p>We trace the curve of periodic orbits from a Hopf point. Note that this can be improved a lot using the linear solver <code>BK.COPBLS</code>, we do not do it here to simplify the code.</p><pre><code class="language-julia hljs"> argspo = (record_from_solution = (x, p; k...) -&gt; begin
                 xtt = BK.get_periodic_orbit(p.prob, x, p.p)
                 return (max = maximum(xtt[3,:]), min = minimum(xtt[3,:]), period = x[end])
             end,
@@ -126,10 +140,10 @@ br_po = BK.continuation(
 - #  1, <span class="sgr34"><span class="sgr1">      bp</span></span> at D ≈ +0.21722034 ∈ (+0.21722034, +0.21722524), |δp|=5e-06, [<span class="sgr32"><span class="sgr1">converged</span></span>], δ = ( 1,  0), step =  27
 - #  2, <span class="sgr34"><span class="sgr1">      bp</span></span> at D ≈ +0.21468033 ∈ (+0.21468033, +0.21468078), |δp|=4e-07, [<span class="sgr32"><span class="sgr1">converged</span></span>], δ = (-1,  0), step =  39
 - #  3, <span class="sgr1">endpoint</span> at D ≈ +0.24427890,                                                                     step = 131
-</code></pre><pre><code class="language- hljs">f, ax = BK.plot(br, br_po, branchlabel = [&quot;equilibria&quot;,&quot;periodic orbits&quot;])
+</code></pre><pre><code class="language- hljs">f, ax = BK.plot(br, br_po, branchlabel = [&quot;equilibria&quot;, &quot;periodic orbits&quot;])
 xlims!(ax, (0.1,0.4))
 f</code></pre><p>We can now compute the manifold</p><pre><code class="language-julia hljs">using LinearAlgebra
-const coll = br_po.prob
+const coll = br_po.prob # I know! This is not very good...
 
 prob = MPC.ManifoldProblem_BK(
                         br_po.prob, br_po.sol[1].x, (@optic _.D), (@optic _.β),
@@ -142,7 +156,7 @@ prob = MPC.ManifoldProblem_BK(
                             D = X[end-1]
                             β = X[end]
                             keep = (0.1 &lt;= D &lt;= 0.5) &amp;&amp; (1.5 &lt;= β &lt;= 1.65)
-                            return keep #&amp;&amp; norm(X) &lt; 10
+                            return keep
                         end,
                         )
 
@@ -155,7 +169,7 @@ S_po = @time MPC.continuation(prob,
                                 max_steps = 200,
                                 verbose = 1,
                                 newton_options = NewtonPar(tol = 1e-10, verbose = false),
-                                R0 = .95,
+                                R0 = .5,
                                 ϵ = 0.4,
                                 delta_angle = 4pi,
                                 )
@@ -163,7 +177,15 @@ S_po = @time MPC.continuation(prob,
    ├─ # charts = 200
    └─ problem = 
 </code></pre><pre><code class="language-julia hljs">fig = Figure()
-ax3 = Axis3(fig[1,1], zlabel = &quot;u3&quot;, xlabel = &quot;D&quot;, ylabel = &quot;β&quot;, title = &quot;PO $(length(S_po)) charts&quot;)
-pts = mapreduce(c-&gt;[c.data[1], c.data[3], c.data[4]]&#39;, vcat, S_po.atlas)
+ax3 = Axis3(fig[1,1], xlabel = &quot;period&quot;, ylabel = &quot;D&quot;, zlabel = &quot;β&quot;, title = &quot;PO $(length(S_po)) charts&quot;)
+pts = mapreduce(c-&gt;[c.data.period, c.data.D, c.data.β ]&#39;, vcat, S_po.atlas)
 scatter!(ax3, pts, color = [c.data[2] for c in S_po.atlas])
-fig</code></pre><img src="149ef490.png" alt="Example block output"/></article><nav class="docs-footer"><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Friday 12 September 2025 16:40">Friday 12 September 2025</span>. Using Julia version 1.11.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+fig</code></pre><img src="cf1b0b11.png" alt="Example block output"/><p>or</p><pre><code class="language-julia hljs">fig = Figure()
+ax3 = Axis3(fig[1,1], zlabel = &quot;β&quot;, xlabel = &quot;period&quot;, ylabel = &quot;D&quot;, title = &quot;PO $(length(S_po)) charts&quot;)
+MPC.plotd(ax3, S_po;
+    draw_tangent = true,
+    plot_center = false,
+    draw_edges = false,
+    ind_plot = (604,605,606)
+    )
+fig</code></pre><img src="1885936d.png" alt="Example block output"/></article><nav class="docs-footer"><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Friday 19 September 2025 16:42">Friday 19 September 2025</span>. Using Julia version 1.11.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
