@@ -18,7 +18,6 @@ function abc!(dz, z, p, t = 0)
     dz
 end
 
-# we group the differentials together
 par_abc = (D = 0.11, B = 8., α = 1., σ = 0.04, β = 1.56)
 z0 = [1., 0., 0. ]
 prob_bk = BifurcationProblem(abc!, z0, par_abc, (@optic _.D), 
@@ -29,7 +28,6 @@ br = BK.continuation(prob_bk, PALC(), opts_br; normC = norminf)
 ```
 
 We can also compute the stationary points as function of two free parameters:
-
 
 ```@example TUTABC
 prob = MPC.ManifoldProblem_BK(

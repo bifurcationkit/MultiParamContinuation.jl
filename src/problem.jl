@@ -30,19 +30,19 @@ for op in (:ManifoldProblem, :ManifoldProblemBK)
     ```
     """
     struct $op{Tu <: AbstractVector, Tp, TVF, Trec, Tproj, Ttangent, Tradius, Tevent, Tfinalize, Tbb, Tpc, Tupdate} <: AbstractManifoldProblem
-        "[Internal] input space dimension"
+        "[Internal] input space dimension."
         n::Int
-        "[Internal] output space dimension"
+        "[Internal] output space dimension."
         m::Int
-        "Equation representing the mapping F"
+        "Equation representing the mapping F (vector field)."
         VF::TVF
-        "Guess for the initial point on the manifold"
+        "Guess for the initial point on the manifold."
         u0::Tu
         "Parameters passed to F"
         params::Tp
-        "Record a few indicators at each chart of the manifold"
+        "Record a few indicators at each chart of the manifold."
         recordFromSolution::Trec
-        "Function to project a point from a tangent space to the manifold. If not provided, a newton algorithm is used. The signature is `project(u, par)` and returns a vector of solutions"
+        "Function to project a point from a tangent space to the manifold. If not provided, a newton algorithm is used. The signature is `project(u, par)` and returns a vector of solutions."
         project::Tproj
         "Compute an orthonormal basis of the tangent space at a point u on the manifold. Return a matrix of dimension n x (n-m). The signature is `get_tangent(u, par)`. If not provided, a dedicaded function is used."
         get_tangent::Ttangent
@@ -50,13 +50,13 @@ for op in (:ManifoldProblem, :ManifoldProblemBK)
         get_radius::Tradius
         "Event function"
         event_function::Tevent
-        "Finalise solution. Function to accept or not the current chart. It has signature `finalise(c::Chart, par)::Bool`"
+        "Finalise solution. Function to accept or not the current chart. It has signature `finalise(c::Chart, par)::Bool`."
         finalize_solution::Tfinalize
         "Function  used to project a point for the tree used to find the charts near a new point. Needs not be linear but the dimension should be at least the manifold embedding dimension."
         project_for_tree::Tbb
-        "[Internal] constrained problem for projecting on manifold"
+        "[Internal] constrained problem for projecting on manifold."
         prob_cons::Tpc
-        "Function used to update the problem after each continuation step. The signature is `update_problem!(prob, ::Atlas)`"
+        "Function used to update the problem after each continuation step. The signature is `update_problem!(prob, ::Atlas)`."
         update!::Tupdate
     end
 

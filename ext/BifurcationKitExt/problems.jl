@@ -46,7 +46,7 @@ end
 """
 $SIGNATURES
 
-Create a BifurcationProblem with two parameter axes for which we continue the zeros.
+Create a Bifurcation Problem with two parameter axes for which we continue the zeros.
 """
 struct BifurcationProblem_2P{T1, T2, T3}
     prob::T1

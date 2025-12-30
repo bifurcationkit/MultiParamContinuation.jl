@@ -67,7 +67,7 @@ You can pass a finalizer function which returns a boolean. This boolean is used 
 You can have a look at [bounding space](@ref bouding-space) for predefined finalizer functions for simple spaces.
 
 ```@example TUTPROB
-prob = ManifoldProblem(F, [.0,0.,0.], nothing;
+prob = ManifoldProblem(F, [0,0,0.], nothing;
                         finalize_solution = (c::Chart, p) -> true
                         )
 ```

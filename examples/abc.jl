@@ -162,7 +162,7 @@ opts_po_cont = ContinuationPar(dsmax = 0.03, dsmin = 1e-4, ds = 0.0005, max_step
 
 br_po = BK.continuation(
     br, 1, opts_po_cont,
-    PeriodicOrbitOCollProblem(50, 4; update_section_every_step = 1, jacobian = BK.DenseAnalyticalInplace());
+    PeriodicOrbitOCollProblem(50, 4; jacobian = BK.DenseAnalyticalInplace());
     δp = 0.0001,
     linear_algo = BK.COPBLS(),
     # verbosity = 1,
