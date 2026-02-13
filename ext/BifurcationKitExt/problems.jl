@@ -68,7 +68,7 @@ function jacobian(pb::BifurcationProblem_2P, Z, par)
     p2 = Z[end]
     par2 = BK._set(par, (pb.lens1, pb.lens2), (p1, p2))
     # @error (@which BK._get_matrix(BK.jacobian(pb.prob, u, par2)))
-    J0 = BK._get_matrix(BK.jacobian(pb.prob, u, par2))
+    J0 = (BK.jacobian(pb.prob, u, par2))
     l1 = ForwardDiff.derivative(z -> pb((@set Z[end-1] = z), par), Z[end-1])
     l2 = ForwardDiff.derivative(z -> pb((@set Z[end] = z),   par), Z[end])
     hcat(J0, l1, l2)
