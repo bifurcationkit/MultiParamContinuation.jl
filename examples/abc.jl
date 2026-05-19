@@ -21,7 +21,7 @@ end
 # we group the differentials together
 par_abc = (D = 0.11, B = 8., α = 1., σ = 0.04, β = 1.56)
 z0 = [1., 0., 0. ]
-prob_bk = BifurcationProblem(abc!, z0, par_abc, (@optic _.D), 
+prob_bk = ODEBifProblem(abc!, z0, par_abc, (@optic _.D), 
         record_from_solution = (x, p; k...) -> (u3 = x[3], u1 = x[1], u2 = x[2]),)
 
 opts_br = ContinuationPar(p_max = 1.5, n_inversion = 8, nev = 3)

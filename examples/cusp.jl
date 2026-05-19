@@ -41,6 +41,6 @@ f = MPC.plotd(S;
     draw_tangent = false, 
     plot_center = true,
     # put_ids = true,
-    ind_plot = [1,3])
+    ind_plot = 1:3)
 
 step!(S, 1500)

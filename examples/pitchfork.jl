@@ -38,7 +38,7 @@ MPC.plotd(S;
     # draw_circle = true,
     draw_tangent = true, 
     draw_edges = true,
-    ind_plot = [1,3])
+    ind_plot = 1:3)
 
 step!(S,500);fig = MPC.plotd(S)
 

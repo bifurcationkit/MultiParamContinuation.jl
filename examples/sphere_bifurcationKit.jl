@@ -42,4 +42,4 @@ MPC.plotd(S;
     draw_edges = true,
     # plot_center = true,
     # put_ids = true,
-    ind_plot = [1,3])
+    ind_plot = 1:3)

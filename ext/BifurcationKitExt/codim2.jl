@@ -1,3 +1,4 @@
+@inline finalize_default_codim2(u, p; k...) = true
 """
 $SIGNATURES
 
@@ -14,8 +15,8 @@ function continuation(br::BK.ContResult,
                                         use_tree = false,
                                     ),
                         record_from_solution = BK.record_sol_default,
-                        continuationpar_bk::ContinuationPar = br.contparams,
-                        finalize_solution = (X, p; k...) -> true,
+                        continuationpar_bk::ContinuationPar = BK.getcontparams(br),
+                        finalize_solution = finalize_default_codim2,
                         options_bk = (
                                 jacobian_ma = BK.MinAugMatrixBased(),
                                 update_minaug_every_step = 1,
@@ -34,10 +35,16 @@ function continuation(br::BK.ContResult,
     br_codim2 = BK.continuation(br, ind, lens2, continuationpar_bk; options_bk...)
     # we now extract the bifurcation problem and use it for 
     prob_bk = BK.getprob(br_codim2)
+    ma_solution = br_codim2.sol[1].x
+    if ma_solution isa BK.MASolution
+        u0 = vcat(BK.get_solution(ma_solution), ma_solution.p1)
+    elseif ma_solution isa BK.MASolutionFreq
+        u0 = vcat(BK.get_solution(ma_solution), ma_solution.p1, ma_solution.ω)
+    end
 
     prob_mpc = ManifoldProblem_BK(
                 prob_bk, 
-                br_codim2.sol[1].x,
+                u0,
                 lens2, lens3;
                 record_from_solution,
                 finalize_solution

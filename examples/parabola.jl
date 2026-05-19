@@ -12,7 +12,7 @@ using MultiParamContinuation
 const MPC = MultiParamContinuation
 
 
-F(u,p) = [u[1]^12 + u[2]^12 - u[3]] 
+F(u,p) = [u[1]^12 + u[2]^12 - u[3]]
 
 prob = ManifoldProblem(F, [0,0,0.], nothing;
             finalize_solution = (u,p) -> (u[3] < 2) * (u[1]>-10.1) * (u[2]>-0.1))

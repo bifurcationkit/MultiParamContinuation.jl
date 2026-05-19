@@ -104,9 +104,9 @@ for op in (:ManifoldProblem, :ManifoldProblemBK)
 end
 
 @inline get_radius_default(u, p) = 1
-@inline finalize_default(u,p) = true
-@inline event_default(u,p) = nothing
-@inline project_for_tree_default(u,p) = nothing
+@inline finalize_default(u, p) = true
+@inline event_default(u, p) = nothing
+@inline project_for_tree_default(u, p) = nothing
 
 # empty function for BifurcationKit extension
 function ManifoldProblem_BK end

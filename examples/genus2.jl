@@ -49,6 +49,6 @@ MPC.plot2d(S;
     # draw_tangent = true, 
     # plot_center = false,
     put_ids = true,
-    ind_plot = [1,2]
+    ind_plot = 1:2
     )
 

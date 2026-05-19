@@ -12,7 +12,7 @@ using MultiParamContinuation
 using Test, LinearAlgebra
 const MPC = MultiParamContinuation
 
-function F(u,p) 
+function F(u, p) 
     x,y,z = u
     r = x^2+y^2+z^2
     [(r+2*y-1)*((r-2*y-1)^2-8*z^2)+16*x*z*(r-2*y-1)]
@@ -37,14 +37,14 @@ f = MPC.plotd(S;
     draw_edges = true,
     # plot_center = true,
     # put_ids = true,
-    ind_plot = [1,3])
+    ind_plot = 1:3)
 
 MPC.plot2d(S; 
     draw_circle = true, 
     draw_tangent = true, 
     plot_center = true,
     put_ids = true,
-    ind_plot = [2,3])
+    ind_plot = 1:3)
 
 
 step!(S, 1000)
@@ -60,7 +60,7 @@ MPC.plotd(ax, S;
     draw_tangent = true, 
     # plot_center = true,
     # put_ids = true,
-    ind_plot = [1,3])
+    ind_plot = 1:3)
 f
 
 ax = current_axis()

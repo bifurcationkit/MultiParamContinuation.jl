@@ -1,4 +1,5 @@
 using ForwardDiff
+record_from_solution_nothing(x, p; k...) = nothing
 
 """
 $SIGNATURES
@@ -101,13 +102,13 @@ function ManifoldProblem_BK(prob_bk::BK.AbstractBifurcationProblem,
                             lens1, 
                             lens2;
                             check_dim::Bool = true,
-                            record_from_solution = (u,p;k...) -> nothing,
+                            record_from_solution = record_from_solution_nothing,
                             project = nothing,
                             get_radius = get_radius_default,
                             get_tangent = nothing,
                             event_function = event_default,
                             finalize_solution = finalize_default)
-    par = prob_bk.params
+    par = BK.getparams(prob_bk)
     m = length(BK.residual(prob_bk, prob_bk.u0, par))
 
     # make a bifurcation problem with two parameters axes

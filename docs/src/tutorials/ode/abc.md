@@ -141,14 +141,15 @@ We trace the curve of periodic orbits from a Hopf point. Note that this can be i
         lines!(ax, xtt.t, xtt.u[1,:]; label = "u1", linewidth = 2)
         lines!(ax, xtt.t, xtt.u[2,:]; label = "u2")
         BK.plot!(get(k, :ax1, nothing), br)
-    end,)
+    end,
+    )
 
 # continuation parameters
 opts_po_cont = ContinuationPar(dsmax = 0.03, dsmin = 1e-4, ds = 0.0005, max_steps = 130, tol_stability = 4e-2, plot_every_step = 20)
 
 br_po = BK.continuation(
     br, 1, opts_po_cont,
-    PeriodicOrbitOCollProblem(30, 4; jacobian = BK.DenseAnalyticalInplace());
+    Collocation(30, 4; jacobian = BK.DenseAnalyticalInplace());
     δp = 0.0001,
     argspo...,
     normC = norminf)
@@ -187,7 +188,7 @@ S_po = @time MPC.continuation(prob,
                                   use_curvature = true,
                                   ),
                         CoveringPar(max_charts = 20000,
-                                max_steps = 200,
+                                max_steps = 300,
                                 verbose = 1,
                                 newton_options = NewtonPar(tol = 1e-10, verbose = false),
                                 R0 = .5,
@@ -214,7 +215,7 @@ MPC.plotd(ax3, S_po;
     draw_tangent = true, 
     plot_center = false,
     draw_edges = false,
-    ind_plot = (604,605,606)
+    ind_plot = (204,205,206)
     )
 fig
 ```

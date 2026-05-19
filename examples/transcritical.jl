@@ -38,7 +38,7 @@ MPC.plotd(S;
     draw_tangent = true, 
     # plot_center = true,
     # put_ids = true,
-    ind_plot = [1,3])
+    ind_plot = 1:3)
 
 step!(S, 1000);fig = MPC.plotd(S; draw_circle = false)
 
@@ -48,4 +48,4 @@ MPC.plot2d(S;
     draw_tangent = true, 
     plot_center = true,
     # put_ids = true,
-    ind_plot = [1,2])
+    ind_plot = 1:2)
