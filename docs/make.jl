@@ -18,8 +18,14 @@ makedocs(
 	draft = false,
 	warnonly = true,
 	sitename = "Multi parameter continuation in Julia",
-	format = Documenter.HTML(collapselevel = 1,),# assets = ["assets/indigo.css"]),
 	authors = "Romain Veltz",
+	format = Documenter.HTML(
+		collapselevel = 1,
+		assets=[
+			asset("https://bifurcationkit.github.io/assets/js/documentation.js"),
+			asset("https://bifurcationkit.github.io/assets/css/documentation.css"),
+				],
+	),
 	pages = Any[
 		"Home" => "index.md",
 		"Tutorials" => "tutorials/tutorials.md",
