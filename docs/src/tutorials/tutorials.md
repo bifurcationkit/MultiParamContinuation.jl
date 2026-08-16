@@ -15,7 +15,7 @@ The tutorials are rated by the following scale of difficulty
 ## Small dimension examples
 
 ```@contents
-Pages = ["ode/plane.md", "ode/sphere.md", "ode/torus.md",]
+Pages = ["ode/plane.md", "ode/sphere.md", "ode/torus.md", "ode/parabola.md",]
 Depth = 1
 ```
 
