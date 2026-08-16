@@ -183,18 +183,38 @@ function _jacobian_2P(pb::BifurcationProblem_2P, ::BK.FiniteDifferencesMF, Z, pa
     return dx -> (pb(Z .+ h .* dx, par) .- pb(Z, par)) ./ h
 end
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-struct _A{T1, T2, T3, T4}
+"""
+$TYPEDEF
+
+Constrained problem used to project a point `w` back on the manifold. It is the mapping
+
+    (pb::ConstrainedProblem)(w, p) = [F(w, p) ; Φ' (w - wbar)]
+
+where `F` is the residual of the underlying bifurcation problem `prob`, `Φ` is an
+orthonormal basis of the tangent space at the chart center `wbar`. The extra constraint
+`Φ' (w - wbar) = 0` restricts `w` to the affine tangent plane; the projection onto the
+manifold is obtained by solving `(pb::ConstrainedProblem)(w, p) = 0` for `w`.
+
+## Fields
+
+$TYPEDFIELDS
+"""
+struct ConstrainedProblem{T1, T2, T3, T4}
+    "Underlying bifurcation problem, typically a `BifurcationProblem` wrapping a `BifurcationProblem_2P`."
     prob::T1
+    "Orthonormal basis of the tangent space at `wbar`, a matrix of size `n × (n-m)`."
     Φ::T2
+    "Cached `Φ' * wbar`."
     Φwbar::T3
+    "Center of the chart, a point on the manifold."
     wbar::T4
 end
 
-function (pb::_A)(w, p)
+function (pb::ConstrainedProblem)(w, p)
     vcat(BK.residual(pb.prob.VF, w, p), pb.Φ' * (w - pb.wbar))
 end
 
-function jacobian(pb::_A, w, p)
+function jacobian(pb::ConstrainedProblem, w, p)
     J0 = BK.jacobian(pb.prob, w, p)
     vcat(J0, pb.Φ')
 end
