@@ -3,10 +3,14 @@ struct QRDirectTangent <: AbstractTangentAlgorithm end
 struct BorderedTangent <: AbstractTangentAlgorithm end
 
 abstract type AbstractManifoldProblem end
+abstract type AbstractManifoldProblemBifurcationKit <: AbstractManifoldProblem end
 
 update_default(args...; kwargs...) = true
 
-for op in (:ManifoldProblem, :ManifoldProblemBK)
+for (op, at) in ((:ManifoldProblem , :AbstractManifoldProblem),
+            (:ManifoldProblemBK, :AbstractManifoldProblemBifurcationKit),
+            (:ManifoldProblemBKMatrixFree, :AbstractManifoldProblemBifurcationKit),
+            )
     @eval begin
     """
     $TYPEDEF
@@ -33,7 +37,7 @@ for op in (:ManifoldProblem, :ManifoldProblemBK)
                     )
     ```
     """
-    struct $op{Tu <: AbstractVector, Tp, TVF, Trec, Tproj, Ttangent, Tradius, Tevent, Tfinalize, Tbb, Tpc, Tupdate} <: AbstractManifoldProblem
+    struct $op{Tu <: AbstractVector, Tp, TVF, Trec, Tproj, Ttangent, Tradius, Tevent, Tfinalize, Tbb, Tpc, Tupdate} <: $at
         "[Internal] input space dimension."
         n::Int
         "[Internal] output space dimension."

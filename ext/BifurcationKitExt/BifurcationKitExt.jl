@@ -7,7 +7,9 @@ module BifurcationKitExt
     
     import MultiParamContinuation: correct_guess,
                                     project_on_M,
+                                    AbstractManifoldProblemBifurcationKit,
                                     ManifoldProblemBK,
+                                    ManifoldProblemBKMatrixFree,
                                     ManifoldProblem_BK,
                                     get_radius_default,
                                     event_default,
@@ -18,7 +20,12 @@ module BifurcationKitExt
                                     jacobian,
                                     d2F,
                                     continuation,
-                                    CoveringPar
+                                    CoveringPar,
+                                    AbstractTangentAlgorithm,
+                                    BorderedTangent,
+                                    QRDirectTangent,
+                                    _get_tangent_bordered,
+                                    _get_tangent_QR
 
     include("problems.jl")
     include("codim2.jl")
