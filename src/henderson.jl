@@ -385,7 +385,7 @@ end
 function remove_halfspace!(Ω::Atlas, c1::Chart)
     verbose = Ω.alg.contparams.verbose > 1
     weights = get_weights(Ω)
-    int_list = intersec_list(Ω, c1)
+    int_list = intersec_list(Ω, c1; dotmin = Ω.alg.contparams.dotmin)
     for id in int_list
         cΩ = Ω[id]
         @assert cΩ.index == id

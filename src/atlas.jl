@@ -172,13 +172,16 @@ end
 
 """
 This is an over-estimate on the charts that intersect c. Better look at `true_intersec_list`.
+
+If `dotmin > 0`, pairs whose tangent spaces are too different (`matrix_dot < dotmin`) are
+skipped.
 """
-function intersec_list(Ω::Atlas, c::Chart, use_tree_bool::Bool = use_tree(Ω))
+function intersec_list(Ω::Atlas, c::Chart, use_tree_bool::Bool = use_tree(Ω); dotmin = zero(eltype(c)))
     Jᵢᵐ = Int[]
     weights = get_weights(Ω)
     if ~use_tree_bool
         for cΩ in Ω.atlas
-            if do_they_intersect(cΩ, c, weights)
+            if do_they_intersect(cΩ, c, weights) && (dotmin <= 0 || matrix_dot(weights, cΩ.Φ, c.Φ) >= dotmin)
                 push!(Jᵢᵐ, cΩ.index)
             end
         end
@@ -186,7 +189,7 @@ function intersec_list(Ω::Atlas, c::Chart, use_tree_bool::Bool = use_tree(Ω))
         @assert c.index <= length(Ω)
         list = neighbors(Ω.tree, Ω, c.index)
         for id in list
-            if do_they_intersect(Ω[id], c, weights)
+            if do_they_intersect(Ω[id], c, weights) && (dotmin <= 0 || matrix_dot(weights, Ω[id].Φ, c.Φ) >= dotmin)
                 push!(Jᵢᵐ, id)
             end
         end

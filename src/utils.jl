@@ -19,6 +19,20 @@ Squared euclidean distance. This version is non allocating compared to `norm(u1 
 @inline dist2(::TrivialWeight, u1, u2) = mapreduce(x -> abs2(x[1] - x[2]), +, zip(u1, u2))
 @inline dist2(w::AbstractVector, u1, u2) = mapreduce(x -> x[3] * abs2(x[1] - x[2]), +, zip(u1, u2, w))
 
+"""
+Measure of the difference between the tangent spaces spanned by the (n × k) matrices
+`A` and `B`. It returns the minimum over the columns `bᵢ` of `B` of the squared weighted
+norm of the projection of `bᵢ` onto `span(A)`,
+
+    dot = minᵢ ‖Aᵀ D bᵢ‖²
+
+with `D = Diagonal(w)`. For `k = 1` it is `cos²θ`, `θ` being the angle between the two
+tangent lines. Charts whose tangent spaces have `dot < dotmin` are considered not to
+intersect (see `CoveringPar.dotmin`).
+"""
+@inline matrix_dot(w::Weight, A, B) = _matrix_dot(get_weights(w), A, B)
+@inline _matrix_dot(::TrivialWeight, A, B) = minimum(sum(abs2, A' * B; dims = 1))
+@inline _matrix_dot(w::AbstractVector, A, B) = minimum(sum(abs2, A' * Diagonal(w) * B; dims = 1))
 
 """
 Orthonormalize the columns of `T` (n × k) in the weighted metric D = Diagonal(w),
