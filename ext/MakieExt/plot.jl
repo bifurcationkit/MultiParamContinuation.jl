@@ -83,12 +83,113 @@ function plotd(chart::Chart; k...)
     f
 end
 
-function plotd(ax, Σ::Atlas; k...)
+function plotd(ax, Σ::Atlas; 
+                draw_circle = false,
+                colorrange = nothing,
+                draw_frame = false,
+                draw_tangent = true,
+                put_ids = false,
+                plot_center = false,
+                draw_edges = false,
+                ind_plot = (1,2,3),
+                record_from_solution = (u, p; k...) -> u,
+                k...)
     n = length(Σ)
+    cr = isnothing(colorrange) ? (1, n) : colorrange
+
+    pts = Point3f[]
+    faces = UInt32[]
+    vertex_colors = Colorant[]
+    edge_pts = Point3f[]
+    centers = Point3f[]
+    center_ids = Int[]
+    text_pos = Point3f[]
+    texts = String[]
+    frame_pts_red = Point3f[]
+    frame_pts_green = Point3f[]
+    circle_pts = Point3f[]
+    circle_colors = Int[]
+    offset = 0
+
     for (ind, chart) in pairs(Σ.atlas)
-        plotd(ax, chart; ind, colorrange = (1,n), k... )
+        u0 = chart.u
+        T = chart.Φ
+        R = chart.R
+        Φ = s -> u0 .+ T * s
+
+        _color = is_on_boundary!(chart) ? HSV(40,30,60) : HSV(200, 50, 50)
+        _color = chart.label == Symbol() ? _color : :red
+
+        if draw_tangent
+            Pt = hcat((Φ(s) for s in chart.P)..., Φ(chart.P[1]))
+            npts = length(chart.P)
+            append!(pts, (Point3f(x[ind_plot[1]], x[ind_plot[2]], x[ind_plot[3]]) for x in eachcol(Pt)))
+            append!(vertex_colors, fill(Makie.to_color(_color), npts + 1))
+            points2d = [Point2f(x[ind_plot[1]], x[ind_plot[2]]) for x in eachcol(Pt)]
+            _faces = Makie.GeometryBasics.earcut_triangulate([points2d])
+            for t in _faces
+                append!(faces, UInt32[UInt32(t[1].i + offset), UInt32(t[2].i + offset), UInt32(t[3].i + offset)])
+            end
+            if draw_edges
+                for i in 1:npts
+                    j = i + 1
+                    push!(edge_pts, Point3f(Pt[ind_plot[1], i], Pt[ind_plot[2], i], Pt[ind_plot[3], i]))
+                    push!(edge_pts, Point3f(Pt[ind_plot[1], j], Pt[ind_plot[2], j], Pt[ind_plot[3], j]))
+                end
+            end
+            offset += npts + 1
+        end
+
+        if draw_circle
+            circ = (Φ(R .* [cos(θ), sin(θ)]) for θ in LinRange(0, 2pi, 101))
+            cp = [Point3f(x[ind_plot[1]], x[ind_plot[2]], x[ind_plot[3]]) for x in circ]
+            for i in 1:(length(cp)-1)
+                push!(circle_pts, cp[i], cp[i+1])
+                push!(circle_colors, ind, ind)
+            end
+        end
+
+        if draw_frame
+            Rf = R / 3
+            us = @view T[:, 1]
+            ut = @view T[:, 2]
+            push!(frame_pts_red, Point3f(u0[ind_plot[1]], u0[ind_plot[2]], u0[ind_plot[3]]),
+                                   Point3f((u0 .+ Rf .* us)[ind_plot[1]], (u0 .+ Rf .* us)[ind_plot[2]], (u0 .+ Rf .* us)[ind_plot[3]]))
+            push!(frame_pts_green, Point3f(u0[ind_plot[1]], u0[ind_plot[2]], u0[ind_plot[3]]),
+                                   Point3f((u0 .+ Rf .* ut)[ind_plot[1]], (u0 .+ Rf .* ut)[ind_plot[2]], (u0 .+ Rf .* ut)[ind_plot[3]]))
+        end
+
+        if plot_center || (n > 0 && chart.index == cr[end])
+            push!(centers, Point3f(u0[ind_plot[1]], u0[ind_plot[2]], u0[ind_plot[3]]))
+            push!(center_ids, ind)
+        end
+
+        if put_ids
+            push!(text_pos, Point3f(u0[ind_plot[1]], u0[ind_plot[2]] + 0.005, u0[ind_plot[3]] + 0.005))
+            push!(texts, "$ind")
+        end
     end
-    # axislegend(ax)
+
+    if draw_tangent && !isempty(faces)
+        mesh!(ax, pts, faces; color = vertex_colors, colorrange = cr)
+    end
+    if draw_edges && !isempty(edge_pts)
+        linesegments!(ax, edge_pts; color = :black)
+    end
+    if draw_circle && !isempty(circle_pts)
+        linesegments!(ax, circle_pts; color = circle_colors, colorrange = cr)
+    end
+    if draw_frame && !isempty(frame_pts_red)
+        linesegments!(ax, frame_pts_red; color = :red)
+        linesegments!(ax, frame_pts_green; color = :green)
+    end
+    if plot_center && !isempty(centers)
+        scatter!(ax, centers; color = center_ids, colorrange = cr)
+    end
+    if put_ids && !isempty(texts)
+        text!(ax, text_pos; text = texts)
+    end
+    ax
 end
 
 function plotd(Σ::Atlas; size = (700,700), k...)
