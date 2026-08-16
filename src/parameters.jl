@@ -57,7 +57,7 @@ $TYPEDFIELDS
     "Bordered Linear Solver"
     solver_bls::Tbls = nothing
     "[Internal]."
-    dotmin::T = 0.2
+    dotmin::T = 0.0
     @assert ϵ > 0 && Rmax >= R0 >= Rmin > 0
     @assert verbose in 0:3
 end

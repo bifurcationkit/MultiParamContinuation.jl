@@ -178,7 +178,7 @@ function _get_tangent_bordered(prob, u0, par, RHS, Φ0 = nothing)
     n, m = size(prob)
     weights = get_weights(prob)
     if isnothing(Φ0)
-        _A = vcat(J, rand(n-m, n))
+        _A = vcat(J, _myrand(u0, n-m, n))
         T = _A \ RHS
         _A = vcat(J, T')
         T = _A \ RHS
@@ -212,9 +212,7 @@ get_tangent(prob::ManifoldProblem{Tu, Tp, TVF, Trec, Tproj, BorderedTangent}, u0
 
 get_tangent(prob::ManifoldProblem{Tu, Tp, TVF, Trec, Tproj, QRDirectTangent}, u0, par, RHS, Φ0 = nothing) where {Tu <: AbstractVector, Tp, TVF, Trec, Tproj} = _get_tangent_QR(prob, u0, par, RHS, Φ0)
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function project(prob, u0, par)
-    prob.project(u0, par)
-end
+project(prob, u0, par) = prob.project(u0, par)
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function get_curvature(prob, u0::AbstractVector{𝒯}, Φ, par) where {𝒯}
     # u0 = c.u

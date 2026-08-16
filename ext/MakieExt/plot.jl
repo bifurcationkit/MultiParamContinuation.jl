@@ -116,7 +116,7 @@ function plotd(ax, Σ::Atlas;
         u0 = chart.u
         T = chart.Φ
         R = chart.R
-        Φ = s -> u0 .+ T * s
+        Φ = s -> Array(u0 .+ T * s) # Array pour StaticArrays
 
         _color = is_on_boundary!(chart) ? HSV(40,30,60) : HSV(200, 50, 50)
         _color = chart.label == Symbol() ? _color : :red

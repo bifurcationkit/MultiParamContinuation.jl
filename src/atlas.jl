@@ -40,6 +40,7 @@ mutable struct Chart{Tu, Ttg, Tr, Tp, Tin, Td, Teve, Tl}
 end
 
 @inline is_inside_ball(c::Chart, P) = norm(P, 2) <= c.R
+@inline Base.eltype(c::Chart) = eltype(c.u)
 
 function is_on_boundary!(c::Chart)
     c.interior = ~all(c.inside_ball)
@@ -69,7 +70,7 @@ end
 
 function init_polygonal_boundary(N, R) 
     v = R / cospi(1/N)
-    return [@SVector [cospi(2*(i-1)/N) * v,
+    return [StA.@SVector [cospi(2*(i-1)/N) * v,
                       sinpi(2*(i-1)/N) * v] for i in Base.OneTo(N)]
 end
 

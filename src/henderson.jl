@@ -77,12 +77,11 @@ function continuation(prob::AbstractManifoldProblem,
                       contparams::CoveringPar;
                       verbose = contparams.verbose,
                       θ = one(eltype(prob)))
-    _verbose = verbose > 0
     # create cache for covering algorithm
     n, m = size(prob)
     dim = n - m
-    cache = HendersonCache(prob, contparams, alg, θ, vcat(zeros(m, dim), I(dim)))
-
+    RHS = _myrhs(prob.u0, m, dim)
+    cache = HendersonCache(prob, contparams, alg, θ, RHS)
     Ω = new_atlas(init(cache), cache; dim = n - m )
     update_boundary!(Ω)
 
@@ -102,7 +101,6 @@ Perform one step of the continuation algorithm.
 function step!(Ω::Atlas)
     alg = Ω.alg
     (;contparams) = alg
-    verbose = contparams.verbose > 0
     new_chart = generate_new_chart(Ω)
     if isnothing(new_chart) || (length(Ω) > contparams.max_charts)
         return false
@@ -146,12 +144,12 @@ function init(cache::HendersonCache)
         u0 = correct_guess(cache, contparams.newton_options)
     end
     # get tangent space
-    T = get_tangent(prob, u0, prob.params, cache._rhs_tangent)
+    Φ = get_tangent(prob, u0, prob.params, cache._rhs_tangent)
     R0 = contparams.R0
     Ps = init_polygonal_boundary(alg.np0, R0)
     data = prob.recordFromSolution(u0, prob.params)
     eve = prob.event_function(u0, prob.params)
-    return new_chart(u0, T, R0, Ps; id = 1, data, eve)
+    return new_chart(u0, Φ, R0, Ps; id = 1, data, eve)
 end
 
 function correct_guess(cache, nl_spec::NonLinearSolveSpec)
@@ -252,7 +250,8 @@ function generate_interior_vertex(c::Chart, sₑ, ds = 1)
     return s
 end
 
-function generate_exterior_vertex(::Atlas, clist::Vector{ <: Chart})
+function generate_exterior_vertex(Ω::Atlas, clist::Vector{ <: Chart})
+    Rmin = Ω.alg.contparams.Rmin
     for chart in clist
         if is_on_boundary!(chart)
             for (ind, P) in pairs(chart.P)
@@ -277,14 +276,16 @@ function generate_new_chart(Ω::Atlas; id = length(Ω) + 1)
     c, sₑ = guess
     cache = Ω.alg
     contparams = cache.contparams
+    prob = cache.prob
     verbose = contparams.verbose > 1
-    (; delta_angle, ϵ) = contparams
+    (; delta_angle, ϵ, Rmin) = contparams
     t = cache.θ
     (;θmin, θmax) = cache.alg
     @assert 0 <= θmax <= 1
     iter = 1
     s = generate_interior_vertex(c, sₑ)
     while t > θmin
+        (t * c.R < Rmin) && break # R*t too small: aborting vertex
         verbose && println("----> iteration = ", iter, ", t = $t, from chart = ", c.index, "\n u = ", c.u[1:3])
         ω = t .* s
         new_chart = _new_chart_from_guess(cache, c, ω; R = c.R, id, weights)

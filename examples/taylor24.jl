@@ -22,7 +22,7 @@ prob = ManifoldProblem(F, [0.2,0.2,-0.,0], nothing;
             record_from_solution = (u,p;k...) -> [u[3],u[4],u[1]/2+u[2]/2]
 )
 
-S = continuation(prob,
+S = @time MPC.continuation(prob,
             Henderson(np0 = 4, 
                       θmin = 0.05,
                       use_curvature = true,
@@ -30,7 +30,7 @@ S = continuation(prob,
                       ),
             CoveringPar(max_charts = 20000,
                     max_steps = 2000,
-                    verbose = 0,
+                    # verbose = 2,
                     newton_options = NonLinearSolveSpec(;maxiters = 8, abstol = 1e-12, reltol = 1e-10),
                     Rmax = .1,
                     R0 = 0.01,
@@ -41,7 +41,7 @@ S = continuation(prob,
 MPC.plotcenters(S)
 MPC.plotd(S, draw_edges = true,)
 
-step!(S, 5000);MPC.plotcenters(S)
+step!(S, 1000);MPC.plotcenters(S)
 
 MPC.plot2d(S; 
     # draw_circle = true, 

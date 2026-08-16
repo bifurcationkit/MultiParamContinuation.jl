@@ -3,8 +3,8 @@ module MultiParamContinuation
     using LinearAlgebra, Parameters
     using Base.Iterators: reverse
     using ProgressLogging: @progress, @withprogress, @logprogress
-    using  NonlinearSolve
-    using StaticArrays
+    using NonlinearSolve
+    import StaticArrays as StA
 
     using Reexport
     @reexport using NonlinearSolve: solve, NewtonRaphson
