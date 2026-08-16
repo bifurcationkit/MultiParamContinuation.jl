@@ -214,13 +214,13 @@ get_tangent(prob::ManifoldProblem{Tu, Tp, TVF, Trec, Tproj, QRDirectTangent}, u0
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 project(prob, u0, par) = prob.project(u0, par)
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function get_curvature(prob, u0::AbstractVector{𝒯}, Φ, par) where {𝒯}
-    # u0 = c.u
-    # Φ = c.Φ
+function get_curvature(prob, u0::AbstractVector{𝒯}, Φ, par, weights) where {𝒯}
     n, m = size(prob)
     d = n - m
     J = jacobian(prob, u0, par)
-    _A = LinearAlgebra.factorize(vcat(J, Φ'))
+    w = get_weights(weights)                                  # coefficients de métrique (ou TrivialWeight)
+    border = w isa TrivialWeight ? Φ' : Φ' * Diagonal(w)      # bord Φ'D (dérivée de la contrainte de projection)
+    _A = LinearAlgebra.factorize(vcat(J, border))
     cmat = zeros(𝒯, d, d)
     for i in Base.OneTo(d)
         Φi = Φ[:, i]
@@ -228,7 +228,7 @@ function get_curvature(prob, u0::AbstractVector{𝒯}, Φ, par) where {𝒯}
             Φj = Φ[:, j]
             d2 = d2F(prob, u0, par, Φi, Φj)
             a = _A \ vcat(d2, zeros(d))
-            cmat[i, j] = norm(a)
+            cmat[i, j] = weighted_norm(weights, a)
             cmat[j, i] = cmat[i, j]
         end
     end

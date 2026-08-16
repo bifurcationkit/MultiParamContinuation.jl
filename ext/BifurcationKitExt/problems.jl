@@ -214,9 +214,9 @@ function (pb::ConstrainedProblem)(w, p)
     vcat(BK.residual(pb.prob.VF, w, p), pb.Φ' * (w - pb.wbar))
 end
 
-function jacobian(pb::ConstrainedProblem, w, p)
-    J0 = BK.jacobian(pb.prob, w, p)
-    vcat(J0, pb.Φ')
+function jacobian(cpb::ConstrainedProblem, w, p)
+    J0 = BK.jacobian(cpb.prob, w, p)
+    vcat(J0, cpb.Φ')
 end
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function project_on_M(prob, guess, chart::Chart, wbar, cpar::CoveringPar{T, <: BK.NewtonPar}, weights) where {T}
