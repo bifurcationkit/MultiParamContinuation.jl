@@ -93,11 +93,15 @@ $SIGNATURES
 
 Bifurcation Problem with two parameter axes for which we continue the zeros.
 """
-struct BifurcationProblem_2P{T1, T2, T3}
+struct BifurcationProblem_2P{T1, T2, T3, T4}
     prob::T1
     lens1::T2
     lens2::T3
+    "How to compute the jacobian of the composite problem. `nothing` (default) uses the jacobian of `prob` for the state block and automatic differentiation for the two parameter blocks. Otherwise a BifurcationKit jacobian marker such as `BK.AutoDiffDense()`, `BK.AutoDiffMF()`, `BK.MatrixFree()`, `BK.FiniteDifferences()`, ..."
+    jacobian::T4
 end
+
+BifurcationProblem_2P(prob, lens1, lens2) = BifurcationProblem_2P(prob, lens1, lens2, nothing)
 
 function (pb::BifurcationProblem_2P)(Z, par)
     u = @view Z[1:end-2]
@@ -128,7 +132,20 @@ function _jacobian_2P(pb::BifurcationProblem_2P, ::Nothing, Z, par)
     hcat(J0, l1, l2)
 end
 
-##############################################################################################################
+# Dense jacobian obtained by automatic differentiation of the composite problem.
+_jacobian_2P(pb::BifurcationProblem_2P, ::BK.AutoDiffDense, Z, par) =
+    ForwardDiff.jacobian(z -> pb(z, par), Z)
+
+# Matrix-free jacobian: return the jacobian-vector product `dx -> J ⋅ dx`.
+_jacobian_2P(pb::BifurcationProblem_2P, ::Union{BK.AutoDiffMF, BK.MatrixFree}, Z, par) =
+    dx -> ForwardDiff.derivative(t -> pb(Z .+ t .* dx, par), zero(eltype(Z)))
+
+# Matrix-free jacobian-vector product obtained by finite differences.
+function _jacobian_2P(pb::BifurcationProblem_2P, ::BK.FiniteDifferencesMF, Z, par)
+    h = sqrt(eps(real(eltype(Z))))
+    return dx -> (pb(Z .+ h .* dx, par) .- pb(Z, par)) ./ h
+end
+#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 struct _A{T1, T2, T3, T4}
     prob::T1
     Φ::T2
@@ -145,54 +162,28 @@ function jacobian(pb::_A, w, p)
     vcat(J0, pb.Φ')
 end
 
-"""
-$SIGNATURES
-
-Make a manifold problem from a `BifurcationProblem` and specifying two parameter axes.
-"""
-function ManifoldProblem_BK(prob_bk::BK.AbstractBifurcationProblem,
-                            u0::AbstractVector, 
-                            lens1, 
-                            lens2;
-                            check_dim::Bool = true,
-                            project = nothing,
-                            get_radius = get_radius_default,
-                            get_tangent = nothing,
-                            record_from_solution = record_from_solution_nothing,
-                            event_function = event_default,
-                            finalize_solution = finalize_default)
-    par = BK.getparams(prob_bk)
-    m = length(BK.residual(prob_bk, prob_bk.u0, par))
-
-    # make a bifurcation problem with two parameters axes
-    pb_composite = BifurcationProblem_2P(prob_bk, lens1, lens2)
-    new_u0 = vcat(u0, BK._get(par, lens1), BK._get(par, lens2))
-
-    prob_mpc = BifurcationProblem(pb_composite, 
-                    new_u0, 
-                    par, 
-                    (@optic _); 
-                    J = (x, p) -> jacobian(pb_composite, x, p)
-                    )
-    𝒯 = eltype(new_u0)
-    Φ = zeros(𝒯, m+2, 2)
-    wbar = zeros(𝒯, m+2)
-    prob_cons = _A(prob_mpc, Φ, Φ' * wbar, wbar)
-
-    ManifoldProblemBK(
-                        prob_mpc,
-                        new_u0, 
-                        par;
-                        m,
-                        check_dim,
-                        record_from_solution,
-                        project,
-                        get_radius,
-                        get_tangent,
-                        event_function,
-                        finalize_solution,
-                        prob_cons,
-                    )
+# Build a `ManifoldProblemBK` / `ManifoldProblemBKMatrixFree` from a vector field
+# `F` (possibly wrapped in a `BifurcationProblem`) using the low-level positional
+# constructor. This avoids re-dispatching on the public constructor names.
+function _make_manifold_problem(::Type{OP}, F, u0, par, m;
+                                check_dim::Bool = true,
+                                record_from_solution = record_from_solution_nothing,
+                                project = nothing,
+                                get_radius = get_radius_default,
+                                get_tangent = nothing,
+                                event_function = event_default,
+                                finalize_solution = finalize_default,
+                                prob_cons = nothing) where {OP}
+    n = length(u0)
+    if check_dim
+        @assert n > m "This does not define an immersed manifold n = $n, m = $m"
+    end
+    OP(n, m, F, u0, par,
+        record_from_solution, project, get_tangent, get_radius,
+        event_function, finalize_solution,
+        MultiParamContinuation.project_for_tree_default,
+        prob_cons,
+        MultiParamContinuation.update_default)
 end
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function project_on_M(prob, guess, chart::Chart, wbar, cpar::CoveringPar{T, <: BK.NewtonPar}) where {T}
