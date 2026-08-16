@@ -1,3 +1,8 @@
+using Revise
+cd(@__DIR__)
+using Pkg
+pkg"activate @MultiParam_GITHUB"
+
 using Revise, Test, ForwardDiff, GLMakie
 using BifurcationKit
 const BK = BifurcationKit
@@ -115,7 +120,7 @@ build_mesh(S_eq)
 
 begin
     fig = Figure()
-    ax = Axis3(fig[1,1], zlabel = "β", xlabel = "D", ylabel = "α", title = "$(length(atlas_hopf)) charts")
+    ax = Axis3(fig[1,1], zlabel = "β", xlabel = "D", ylabel = "α", title = "$(length(S_eq)) charts")
 
     MPC.plotd(ax, S_eq;
         draw_tangent = true,
@@ -131,6 +136,7 @@ opts_cover = CoveringPar(max_charts = 1000,
     max_steps = 500,
     verbose = 1,
     newton_options = NewtonPar(tol = 1e-11, verbose = false),
+    Rmax = 0.31,
     R0 = .31,
     ϵ = 0.15,
     # delta_angle = 10.15,
@@ -145,17 +151,16 @@ atlas_hopf = @time MPC.continuation(deepcopy(br), 1,
         β = X[6]
         return true
     end,
-    alg = Henderson(np0 = 5,
+    alg = Henderson(np0 = 4,
                 θmin = 0.001,
-                use_curvature = false,
+                # use_curvature = true,
                 use_tree = true,
             ),
     )
 
 begin
-    fig = Figure()
+    fig = Figure(size=(1000,1000))
     ax = Axis3(fig[1,1], zlabel = "β", xlabel = "D", ylabel = "α", title = "$(length(atlas_hopf)) charts")
-
     MPC.plotd(ax, atlas_hopf;
         draw_tangent = true,
         plot_center = false,
@@ -258,7 +263,7 @@ begin
     f = build_mesh(S_po)
     ax = current_axis()
     I = findall(0.15 .<= br.param .<= 0.5)
-    lines!(ax, br.param[I], fill(par_abc.β, length(I)), br.u3[I], linewidth = 5, color = :blue)
+    lines!(ax, br.param[I], fill(par_abc.β, length(I)),     br.u3[I], linewidth = 5, color = :blue)
     lines!(ax, br_po.param, fill(par_abc.β, length(br_po)), br_po.max, linewidth = 5, color = :red)
     lines!(ax, br_po.param, fill(par_abc.β, length(br_po)), br_po.max, linewidth = 5, color = :red)
     xlims!(ax, (0.15,0.5))

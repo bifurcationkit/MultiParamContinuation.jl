@@ -27,9 +27,11 @@ module BifurcationKitExt
                                     QRDirectTangent,
                                     _get_tangent_bordered,
                                     _get_tangent_QR,
-                                    TrivialWeight,
-                                    Weight,
-                                    apply_T
+                                     TrivialWeight,
+                                     Weight,
+                                     weighted_norm,
+                                     apply_T,
+                                     get_weights
 
     include("problems.jl")
     include("codim2.jl")

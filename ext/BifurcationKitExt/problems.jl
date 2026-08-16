@@ -17,7 +17,10 @@ for (M, OP) in ((:ManifoldProblem_BK, :ManifoldProblemBK),
         """
         $SIGNATURES
 
-        Make a manifold problem from a vector field `F`.
+        Make a manifold problem from a vector field `F`. The zeros of `F: Rⁿ → Rᵐ`
+        (with `n > m`) define an `n-m`-d manifold. The mapping is wrapped into a
+        `BifurcationProblem`; the same keyword arguments as in the method taking a
+        `BifurcationProblem` are accepted.
         """
         function $M(F, u0::AbstractVector, par;
                     check_dim::Bool = true,
@@ -42,6 +45,9 @@ for (M, OP) in ((:ManifoldProblem_BK, :ManifoldProblemBK),
 
         Make a manifold problem from a `BifurcationProblem` and specifying two parameter axes.
 
+        The unknowns are the composite vector `Z = [u; p1; p2]`, where `p1, p2` are the
+        values of the two parameter axes given by the lenses `lens1, lens2`.
+
         The jacobian of the composite problem `Z = [u; p1; p2]` can be selected with the
         `jacobian` keyword. It defaults to `nothing` (jacobian of `prob_bk` for the state
         block and automatic differentiation for the two parameter blocks). Otherwise pass
@@ -60,7 +66,8 @@ for (M, OP) in ((:ManifoldProblem_BK, :ManifoldProblemBK),
                     event_function = event_default,
                     finalize_solution = finalize_default,
                     weights = Weight(TrivialWeight()),
-                    jacobian = nothing,)
+                    jacobian = nothing,
+                    )
             par = BK.getparams(prob_bk)
             m = length(BK.residual(prob_bk, prob_bk.u0, par))
 
@@ -81,7 +88,7 @@ for (M, OP) in ((:ManifoldProblem_BK, :ManifoldProblemBK),
 
             _make_manifold_problem($OP, prob_mpc, new_u0, par, m;
                         check_dim, record_from_solution, project, get_radius,
-                        get_tangent, event_function, finalize_solution, prob_cons)
+                        get_tangent, event_function, finalize_solution, prob_cons, weights)
         end
     end
 end

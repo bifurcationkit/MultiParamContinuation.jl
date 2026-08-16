@@ -27,13 +27,16 @@ for (op, at) in ((:ManifoldProblem , :AbstractManifoldProblem),
     ManifoldProblem(F, u0, par;
                     m = length(F(u0, par)),
                     check_dim::Bool = true,
-                    recordFromSolution = (u,p) -> nothing,
+                    record_from_solution = (u, p) -> nothing,
                     project = nothing,
                     get_radius = get_radius_default,
                     get_tangent = nothing,
                     event_function = event_default,
                     finalize_solution = finalize_default,
-                    project_for_tree = project_for_tree_default
+                    project_for_tree = project_for_tree_default,
+                    prob_cons = nothing,
+                    update! = update_default,
+                    weights = Weight(TrivialWeight()),
                     )
     ```
     """
@@ -54,19 +57,19 @@ for (op, at) in ((:ManifoldProblem , :AbstractManifoldProblem),
         project::Tproj
         "Compute an orthonormal basis of the tangent space at a point u on the manifold. Return a matrix of dimension n x (n-m). The signature is `get_tangent(u, par)`. If not provided, a dedicaded function is used."
         get_tangent::Ttangent
-        "Get the an estimate of the curvature at a point u on the manifold. If not provided, a dedicaded function is used."
+        "Estimate the radius of validity of a chart centered at `u` (for example from the curvature of the manifold). The signature is `get_radius(u, par)`. If not provided, a dedicated function is used."
         get_radius::Tradius
         "Event function"
         event_function::Tevent
-        "Finalise solution. Function to accept or not the current chart. It has signature `finalise(c::Chart, par)::Bool`."
+        "Function to accept or reject the current chart. It has signature `finalize_solution(u, par)::Bool`."
         finalize_solution::Tfinalize
-        "Function  used to project a point for the tree used to find the charts near a new point. Needs not be linear but the dimension should be at least the manifold embedding dimension."
+        "Function used to project a point for the tree which finds the charts near a new point. Needs not be linear but the dimension should be at least the manifold dimension."
         project_for_tree::Tbb
         "[Internal] constrained problem for projecting on manifold."
         prob_cons::Tpc
         "Function used to update the problem after each continuation step. The signature is `update_problem!(prob, ::Atlas)`."
         update!::Tupdate
-        "Weight for changing the norm, scalar product, etc. Allows "
+        "Diagonal metric coefficients `d` used for the norm `norm(sqrt.(d) .* u)`, the scalar products, the tangent orthonormalization, etc. Defaults to `Weight(TrivialWeight())`."
         weights::Tw
     end
 

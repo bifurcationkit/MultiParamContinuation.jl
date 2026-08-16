@@ -70,20 +70,13 @@ function continuation(prob::AbstractManifoldProblem,
     dim = n - m
     cache = HendersonCache(prob, contparams, alg, θ, vcat(zeros(m, dim), I(dim)))
 
-    chart0 = init(cache)
-    n, m = size(prob)
-    Ω = new_atlas(chart0, cache; dim = n - m )
+    Ω = new_atlas(init(cache), cache; dim = n - m )
     update_boundary!(Ω)
 
-    n_steps = 1
-    while length(Ω) < contparams.max_charts &&  n_steps < contparams.max_steps
-        if _verbose
-            println_current_chart(n_steps, Ω)
-        end
-        if ~step!(Ω)
-            return Ω
-        end
-        n_steps += 1
+    @progress for n_steps = 1:contparams.max_steps
+        verbose > 0 && println_current_chart(n_steps, Ω)
+        (length(Ω) >= contparams.max_charts) && return Ω
+        step!(Ω)
     end
     return Ω
 end
@@ -95,15 +88,17 @@ Perform one step of the continuation algorithm.
 """
 function step!(Ω::Atlas)
     alg = Ω.alg
+    (;contparams) = alg
+    verbose = contparams.verbose > 0
     new_chart = generate_new_chart(Ω)
-    if isnothing(new_chart)
+    if isnothing(new_chart) || (length(Ω) > contparams.max_charts)
         return false
     end
     # We first add new_chart to Ω in order to update the tree.
     # We then update the polygon set of new_chart in remove_halfspace!
     add!(Ω, new_chart)
     remove_halfspace!(Ω, new_chart)
-    if ~is_on_boundary!(new_chart) && alg.contparams.verbose > 0
+    if ~is_on_boundary!(new_chart) && contparams.verbose > 0
         @warn "new chart $(new_chart.index) is not on boundary"
     end
     update_boundary!(Ω)
@@ -116,7 +111,14 @@ $SIGNATURES
 Perform n steps of the continuation algorithm.
 """
 function step!(Ω::Atlas, n::Int)
-    @progress for _ in Base.OneTo(n)
+    alg = Ω.alg
+    (;contparams) = alg
+    l = length(Ω)
+    max_charts = contparams.max_charts
+    if (l >= max_charts)
+        return Ω 
+    end
+    @progress for _ in Base.OneTo(min(n, max_charts - l))
         step!(Ω)
     end
     return Ω
@@ -374,13 +376,13 @@ function remove_halfspace!(Ω::Atlas, c1::Chart)
     for id in int_list
         cΩ = Ω[id]
         @assert cΩ.index == id
-        verbose && println("Merge c$(c1.index) with $(cΩ.index)")
+        verbose && println("Merge c$(c1.index) with c$(cΩ.index)")
         remove_halfspace_first_chart!(c1, cΩ, weights)
     end
     for id in int_list
         cΩ = Ω[id]
         @assert cΩ.index == id
-        verbose && println("Merge c$(cΩ.index) with $(c1.index)")
+        verbose && println("Merge c$(cΩ.index) with c$(c1.index)")
         remove_halfspace_first_chart!(cΩ, c1, weights)
     end
 end

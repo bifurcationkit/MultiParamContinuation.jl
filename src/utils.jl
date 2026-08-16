@@ -10,7 +10,7 @@ end
 
 @inline weighted_norm(w::Weight, u) = _weighted_norm(get_weights(w), u)
 @inline _weighted_norm(::TrivialWeight, u) = norm(u)
-@inline _weighted_norm(w::AbstractVector, u) = norm(w .* u)
+@inline _weighted_norm(w::AbstractVector, u) = norm(sqrt.(w) .* u)
 
 """
 Squared euclidean distance. This version is non allocating compared to `norm(u1 - u2, 2)^2` albeit perhaps less performant for large dimensions.
