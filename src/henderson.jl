@@ -192,7 +192,7 @@ function _new_chart_from_guess(cache, chart, ω;
                                 weights = Weight(TrivialWeight()))
     (;prob, contparams) = cache
     verbose = contparams.verbose > 1
-    (;ϵ, Rmax, α) = contparams
+    (;ϵ, Rmax, Rmin, α) = contparams
     guess = chart.u .+ chart.Φ * ω
     u = project_on_M(prob, guess, chart, copy(guess), contparams, weights)
     if isnothing(u)
@@ -205,7 +205,7 @@ function _new_chart_from_guess(cache, chart, ω;
     new_R = if cache.alg.use_curvature
             K = get_curvature(cache.prob, u, Φ, cache.prob.params)
             radius_estimate = sqrt(2ϵ / K)
-            new_R = min(Rmax, radius_estimate, α * R)
+            new_R = max(Rmin, min(Rmax, radius_estimate, α * R))
             verbose && @error "Radius est" ϵ K radius_estimate R new_R
             new_R
         else
