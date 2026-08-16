@@ -194,21 +194,23 @@ function project(prob, u0, par)
     prob.project(u0, par)
 end
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function get_curvature(prob, c::Chart{Tu}, par) where {T, Tu <: AbstractVector{T}}
+function get_curvature(prob, c::Chart{Tu}, par) where {𝒯, Tu <: AbstractVector{𝒯}}
     u0 = c.u
     Φ = c.Φ
     n, m = size(prob)
     d = n - m
     J = jacobian(prob, u0, par)
-    _A = vcat(J, Φ')
-    A = zeros(T, d, n, d)
+    _A = LinearAlgebra.factorize(vcat(J, Φ'))
+    cmat = zeros(𝒯, d, d)
     for i in Base.OneTo(d)
         Φi = Φ[:, i]
-        for j in Base.OneTo(d)
+        for j in i:d
             Φj = Φ[:, j]
             d2 = d2F(prob, u0, par, Φi, Φj)
-            A[i, :, j] .= _A \ vcat(d2, zeros(d))
+            a = _A \ vcat(d2, zeros(d))
+            cmat[i, j] = norm(a)
+            cmat[j, i] = cmat[i, j]
         end
     end
-    norm(A)
+    return LinearAlgebra.eigmax(Symmetric(cmat))
 end
