@@ -38,7 +38,7 @@ function plotd(ax, chart::Chart;
         Φ = s -> u0 .+ T * s
         Pt = mapreduce(Φ, hcat, chart.P)
         Pt = hcat(Pt, Φ(chart.P[1]))
-        _color = is_on_boundary(chart) ? HSV(40,30,60) : HSV(200, 50, 50)
+        _color = is_on_boundary!(chart) ? HSV(40,30,60) : HSV(200, 50, 50)
         _color = chart.label == Symbol() ? _color :  :red 
 
         points2d = map(x -> Point2f(x[ind_plot[1]], x[ind_plot[2]]), eachcol(Pt))
@@ -141,12 +141,12 @@ function plot2d(Σ::Atlas; size = (700,700),
         return f
     end
 
-    bd = findall(c -> is_on_boundary(c), Σ.atlas)
+    bd = findall(c -> is_on_boundary!(c), Σ.atlas)
     if ~isempty(bd)
         poly!(ax, pts[bd], strokecolor = :black, strokewidth = 1, colorrange = (1,n), alpha = 0.2, color = :orange)
     end
 
-    nbd = findall(c -> !is_on_boundary(c), Σ.atlas)
+    nbd = findall(c -> !is_on_boundary!(c), Σ.atlas)
     if ~isempty(nbd)
         poly!(ax, pts[nbd], strokecolor = :black, strokewidth = 1, colorrange = (1,n), alpha = 0.2, color = eachindex(nbd))
     end
@@ -214,14 +214,14 @@ function _plotd_improved(Σ::Atlas; size = (700,700),
     faces = plotd_improved!(pts, Σ; k...)
     
     n = length(Σ)
-    bd = findall(c -> is_on_boundary(c), Σ.atlas)
+    bd = findall(c -> is_on_boundary!(c), Σ.atlas)
 
     @error "" (faces) (pts)
 
     mesh!(ax, pts, faces)
     # poly!(ax, pts[bd], strokecolor = :black, strokewidth = 1, colorrange = (1,n), alpha = 0.2, color = :orange)
     
-    # nbd = findall(c -> !is_on_boundary(c), Σ.atlas)
+    # nbd = findall(c -> !is_on_boundary!(c), Σ.atlas)
     # poly!(ax, pts[nbd], strokecolor = :black, strokewidth = 1, colorrange = (1,n), alpha = 0.2, color = eachindex(nbd))
     
     if plot_center

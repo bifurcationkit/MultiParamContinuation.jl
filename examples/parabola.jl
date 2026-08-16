@@ -28,7 +28,7 @@ S = continuation(prob,
                     newton_options = NonLinearSolveSpec(;maxiters = 5, abstol = 1e-12, reltol = 1e-10),
                     R0 = .1,
                     ϵ = 0.005,
-                    delta_angle = 0.15,
+                    # delta_angle = 0.15,
                     ))
 
 MPC.plotd(S; 
@@ -38,7 +38,7 @@ MPC.plotd(S;
     # put_ids = true,
     ind_plot = [1,3])
 
-step!(S,1000);fig = MPC.plotd(S; circle = false)
+step!(S,1000);fig = MPC.plotd(S; circle = false, draw_edges = true)
 
 
 MPC.plot2d(S; 

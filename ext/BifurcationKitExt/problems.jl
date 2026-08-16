@@ -87,6 +87,27 @@ jacobian(pb::AbstractManifoldProblemBifurcationKit, u, p) = BK.jacobian(pb.VF, u
 BK.residual(pb::AbstractManifoldProblemBifurcationKit, u, p) = BK.residual(pb.VF, u, p)
 d2F(pb::AbstractManifoldProblemBifurcationKit, x, p, dx1, dx2) = BK.d2F(pb.VF, x, p, dx1, dx2)
 BK.getlens(::AbstractManifoldProblemBifurcationKit) = nothing
+
+function _make_manifold_problem(::Type{OP}, F, u0, par, m;
+                                check_dim::Bool = true,
+                                record_from_solution = record_from_solution_nothing,
+                                project = nothing,
+                                get_radius = get_radius_default,
+                                get_tangent = nothing,
+                                event_function = event_default,
+                                finalize_solution = finalize_default,
+                                prob_cons = nothing) where {OP}
+    n = length(u0)
+    if check_dim
+        @assert n > m "This does not define an immersed manifold n = $n, m = $m"
+    end
+    OP(n, m, F, u0, par,
+        record_from_solution, project, get_tangent, get_radius,
+        event_function, finalize_solution,
+        MultiParamContinuation.project_for_tree_default,
+        prob_cons,
+        MultiParamContinuation.update_default)
+end
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
 $SIGNATURES
@@ -161,30 +182,6 @@ function jacobian(pb::_A, w, p)
     J0 = BK.jacobian(pb.prob, w, p)
     vcat(J0, pb.Φ')
 end
-
-# Build a `ManifoldProblemBK` / `ManifoldProblemBKMatrixFree` from a vector field
-# `F` (possibly wrapped in a `BifurcationProblem`) using the low-level positional
-# constructor. This avoids re-dispatching on the public constructor names.
-function _make_manifold_problem(::Type{OP}, F, u0, par, m;
-                                check_dim::Bool = true,
-                                record_from_solution = record_from_solution_nothing,
-                                project = nothing,
-                                get_radius = get_radius_default,
-                                get_tangent = nothing,
-                                event_function = event_default,
-                                finalize_solution = finalize_default,
-                                prob_cons = nothing) where {OP}
-    n = length(u0)
-    if check_dim
-        @assert n > m "This does not define an immersed manifold n = $n, m = $m"
-    end
-    OP(n, m, F, u0, par,
-        record_from_solution, project, get_tangent, get_radius,
-        event_function, finalize_solution,
-        MultiParamContinuation.project_for_tree_default,
-        prob_cons,
-        MultiParamContinuation.update_default)
-end
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function project_on_M(prob, guess, chart::Chart, wbar, cpar::CoveringPar{T, <: BK.NewtonPar}) where {T}
     if _has_projection(prob)
@@ -208,3 +205,14 @@ function project_on_M(prob, guess, chart::Chart, wbar, cpar::CoveringPar{T, <: B
     end
 end
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+for BKP in (:ManifoldProblemBK, :ManifoldProblemBKMatrixFree)
+    @eval begin
+        function get_tangent(prob::$BKP{Tu, Tp, TVF, Trec, Tproj, BorderedTangent}, u0, par, RHS) where {Tu <: AbstractVector, Tp, TVF, Trec, Tproj}
+            return _get_tangent_bordered(prob, u0, par, RHS)
+        end
+
+        function get_tangent(prob::$BKP{Tu, Tp, TVF, Trec, Tproj, QRDirectTangent}, u0, par, RHS) where {Tu <: AbstractVector, Tp, TVF, Trec, Tproj}
+            return _get_tangent_QR(prob, u0, par, RHS)
+        end
+    end
+end

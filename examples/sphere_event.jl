@@ -43,6 +43,7 @@ function get_tangent(u, par)
     v1z=-v0x*u0y+v0y*u0x
     T = [v0x v0y v0z;
          v1x v1y v1z]'
+    return T
 end
 
 event_function(u, p) = u[3]

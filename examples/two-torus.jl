@@ -21,16 +21,16 @@ prob = ManifoldProblem(F, [0.,0,-0.1], nothing;
 
 S = continuation(prob,
             Henderson(np0 = 4, 
-                      θmin = 0.05,
+                      θmin = 0.07,
                       use_curvature = true,
                       ),
             CoveringPar(max_charts = 20000,
                     max_steps = 2000,
                     verbose = 0,
                     newton_options = NonLinearSolveSpec(;maxiters = 5, abstol = 1e-12, reltol = 1e-10),
-                    R0 = .05,
+                    R0 = .03,
                     ϵ = 0.01,
-                    delta_angle = 10.01,
+                    # delta_angle = 10.01,
                     ))
 
 MPC.plotd(S; 
@@ -39,7 +39,7 @@ MPC.plotd(S;
     # plot_center = true,
     )
 
-step!(S, 3000);fig = MPC.plotd(S; draw_circle = false)
+step!(S, 3000);fig = MPC.plotd(S; draw_circle = false, draw_edges = true)
 
 
 MPC.plotcenters(S)

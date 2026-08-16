@@ -41,7 +41,7 @@ end
 
 @inline is_inside_ball(c::Chart, P) = norm(P, 2) <= c.R
 
-function is_on_boundary(c::Chart)
+function is_on_boundary!(c::Chart)
     c.interior = ~all(c.inside_ball)
     return c.interior
 end
@@ -64,7 +64,7 @@ function new_chart(u0, Φ, Radius, P;
 end
 
 function update!(c::Chart)
-    c.interior = is_on_boundary(c)
+    c.interior = is_on_boundary!(c)
 end
 
 function init_polygonal_boundary(N, R) 
@@ -155,7 +155,7 @@ function update_boundary!(Ω::Atlas)
     empty!(BList)
     for c in Ω.atlas
         update!(c)
-        if is_on_boundary(c) && prob.finalize_solution(c.u, prob.params)
+        if is_on_boundary!(c) && prob.finalize_solution(c.u, prob.params)
             push!(BList, c)
         end
     end

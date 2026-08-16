@@ -47,7 +47,7 @@ $TYPEDFIELDS
     "Maximum number of continuation steps. Because of mesh adaptation or failure, the number of computed charts is less or equal than `max_steps`."
     max_steps::UInt = 1000
     "Verbose mode, belongs to {0,1,2}. verbose = 0 prints nothing. verbose = 1 prints the charts, verbose = 2 print the intersection of the charts."
-    verbose::Int = false
+    verbose::Int = 0
     "Newton options."
     newton_options::Tnl = NonLinearSolveSpec()
     "Bordered Linear Solver"

@@ -125,9 +125,7 @@ function Base.show(io::IO, prob::AbstractManifoldProblem; prefix = "")
     println(io, prefix * "    └─ m = ", prob.m)
 end
 
-function jacobian(prob::ManifoldProblem, u, p)
-    return ForwardDiff.jacobian(x -> prob.VF(x, p), u)
-end
+jacobian(prob::ManifoldProblem, u, p) = ForwardDiff.jacobian(x -> prob.VF(x, p), u)
 
 function d2F(prob, u0, parms, dx1, dx2)
     d1Fad(x,p,dx1) = ForwardDiff.derivative(t -> prob.VF(x .+ t .* dx1, p), zero(eltype(dx1)))
@@ -202,7 +200,7 @@ function get_curvature(prob, c::Chart{Tu}, par) where {T, Tu <: AbstractVector{T
     u0 = c.u
     Φ = c.Φ
     n, m = size(prob)
-    d = n-m
+    d = n - m
     J = jacobian(prob, u0, par)
     _A = vcat(J, Φ')
     A = zeros(T, d, n, d)

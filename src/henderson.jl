@@ -109,7 +109,7 @@ function step!(Ω::Atlas)
     # We then update the polygon set of new_chart in remove_halfspace!
     add!(Ω, new_chart)
     remove_halfspace!(Ω, new_chart)
-    if ~is_on_boundary(new_chart) && alg.contparams.verbose > 0
+    if ~is_on_boundary!(new_chart) && alg.contparams.verbose > 0
         @warn "new chart $(new_chart.index) is not on boundary"
     end
     update_boundary!(Ω)
@@ -150,7 +150,7 @@ function correct_guess(cache, nl_spec::NonLinearSolveSpec)
     probnl = NonlinearProblem(prob.VF, prob.u0, prob.params)
     sol = solve(probnl, nl_spec.nl_solver; nl_spec.options...)
     if sol.retcode != ReturnCode.Success
-        throw("Newton for first point did not converge!!")
+        error("Newton for first point did not converge!!")
     end
     return sol.u
 end
@@ -158,7 +158,14 @@ end
 """
 $SIGNATURES
 
-Compute the projection of guess on the manifold M
+Compute the projection of guess on the manifold M around chart (u₀, Φ). Found by solving
+        ┌                 ┐
+        │     F(x,p)      │ = 0
+        │ Φ' * (x - wbar) │
+        └                 ┘
+with initial guess u₀ + Φ * ω (where ω ∈ R²) and with (the same vector) wbar = u₀ + Φ * ω.
+The constraint can be re-written
+        Φ' * (x - u₀) + ω.
 """
 function project_on_M(prob, guess, chart::Chart, wbar, cpar::CoveringPar{T, <: NonLinearSolveSpec}) where {T}
     if _has_projection(prob)
@@ -195,10 +202,10 @@ function _new_chart_from_guess(cache, chart, ω;
     Φ = get_tangent(prob, u, prob.params, cache._rhs_tangent)
     data = prob.recordFromSolution(u, prob.params)
     eve = prob.event_function(u, prob.params)
-    if isnothing(eve)
-        label = Symbol()
+    label = if isnothing(eve)
+        Symbol()
     else
-        label = eve * chart.event_values < 0 ? :EVE : Symbol()
+        eve * chart.event_values < 0 ? :EVE : Symbol()
     end
     return new_chart(u, 
                 Φ, 
@@ -226,7 +233,7 @@ end
 
 function generate_exterior_vertex(Ω::Atlas, clist::Vector{<: Chart})
     for chart in clist
-        if is_on_boundary(chart)
+        if is_on_boundary!(chart)
             for (ind, P) in pairs(chart.P)
                 if chart.inside_ball[ind] == false
                     if true#check_alphas(Ω, chart) # Henderson p. 463
@@ -264,15 +271,14 @@ function generate_new_chart(Ω::Atlas; id = length(Ω) + 1)
         if cache.alg.use_curvature
             K = get_curvature(cache.prob, new_chart, cache.prob.params)
             radius_estimate = sqrt(2ϵ / K)
-            verbose && @error "Radius est" radius_estimate c.R K
             new_chart.R = min(c.R, radius_estimate)
+            verbose && @error "Radius est" K c.R radius_estimate new_chart.R
         end
         # distance from guess to projected point
         dst = norm(new_chart.u .- (c.u .+ c.Φ * ω), Inf)
         # angle between tangent spaces, do not compute if delta_angle large enough
         δα = delta_angle > pi ? zero(delta_angle) : abs(largest_principal_angle(c.Φ, new_chart.Φ))
-        if δα > delta_angle ||
-                    dst > ϵ
+        if δα > delta_angle || dst > ϵ
             verbose && @error "Reduction"  δα dst cache.θ
             @goto failed
         else 

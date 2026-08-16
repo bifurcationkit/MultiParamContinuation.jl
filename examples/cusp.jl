@@ -26,7 +26,7 @@ S = @time MPC.continuation(prob,
                         use_tree = true
                         ),
             CoveringPar(max_charts = 3500, 
-                    max_steps = 860,
+                    max_steps = 100,
                     verbose = 0,
                     newton_options = NonLinearSolveSpec(;maxiters = 5, abstol = 1e-12, reltol = 1e-10),
                     R0 = .1,
@@ -37,10 +37,12 @@ S = @time MPC.continuation(prob,
             )
 
 f = MPC.plotd(S; 
-    # draw_circle = true, 
-    draw_tangent = false, 
+    draw_circle = true, 
+    draw_tangent = true, 
     plot_center = true,
+    draw_edges = true,
     # put_ids = true,
-    ind_plot = 1:3)
+    ind_plot = 1:3
+    )
 
-step!(S, 1500)
+step!(S, 1500);fig = MPC.plotd(S, draw_edges = true)

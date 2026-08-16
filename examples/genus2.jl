@@ -24,7 +24,7 @@ prob = ManifoldProblem(F, [0.,0,-0.1], nothing;
 S = MPC.continuation(prob,
             Henderson(np0 = 6, 
                       θmin = 0.01,
-                      θmax = 1.5,
+                      θmax = 1.,
                       use_curvature = true,
                       ),
             CoveringPar(max_charts = 7000,

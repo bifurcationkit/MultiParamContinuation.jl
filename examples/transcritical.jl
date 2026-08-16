@@ -22,7 +22,7 @@ prob = ManifoldProblem(F, [-0.6,-0.6,-0.6], nothing;
 S = continuation(prob,
             Henderson(np0 = 4, 
                       θmin = 0.1,
-                    #   use_curvature = true,
+                      use_curvature = true,
                       ),
             CoveringPar(max_charts = 20000,
                     max_steps = 2000,
@@ -38,10 +38,10 @@ MPC.plotd(S;
     draw_tangent = true, 
     # plot_center = true,
     # put_ids = true,
+    draw_edges = true,
     ind_plot = 1:3)
 
-step!(S, 1000);fig = MPC.plotd(S; draw_circle = false)
-
+step!(S, 2000);fig = MPC.plotd(S; draw_circle = false, draw_edges = true)
 
 MPC.plot2d(S; 
     # draw_circle = true, 

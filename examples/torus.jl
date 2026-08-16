@@ -60,7 +60,8 @@ ax = Axis3(f[1,1], aspect = :data, elevation = pi/4, azimuth = -pi/3)
 MPC.plotd(ax, S; 
     # draw_circle = true, 
     draw_tangent = true, 
+    draw_edges = true,
     # plot_center = true,
     # put_ids = true,
-    ind_plot = [1,3])
+    ind_plot = 1:3)
 f
