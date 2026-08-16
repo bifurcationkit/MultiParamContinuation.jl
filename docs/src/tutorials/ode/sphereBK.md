@@ -15,7 +15,7 @@ const MPC = MultiParamContinuation
 F(u,p) = [u[1]^2 + u[2]^2 + u[3]^2 - 1]
 
 prob = ManifoldProblem_BK(F, 
-                    [1,0.,0.],
+                    [1.,0,0],
                     nothing
                         )
 ```
@@ -33,6 +33,7 @@ S = MPC.continuation(prob,
                     max_steps = 250,
                     # trigger the use of BifurcationKit newton solver
                     newton_options = NewtonPar(),
+                    Rmax = 0.2,
                     R0 = .2,
                     )
             )

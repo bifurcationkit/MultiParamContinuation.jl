@@ -36,10 +36,11 @@ We now compute the covering of the manifold
 S = MPC.continuation(prob,
             Henderson(),
             CoveringPar(max_charts = 20000, 
-                    max_steps = 250,
+                    max_steps = 300,
                     verbose = 0,
                     newton_options = NonLinearSolveSpec(;maxiters = 5),
-                    R0 = .2,
+                    Rmax = 0.2,
+                    R0 = 0.2,
                     )
             )
 show(S)

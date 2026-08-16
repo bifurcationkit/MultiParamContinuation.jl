@@ -87,7 +87,7 @@ for (M, OP) in ((:ManifoldProblem_BK, :ManifoldProblemBK),
             𝒯 = eltype(new_u0)
             Φ = zeros(𝒯, m+2, 2)
             wbar = zeros(𝒯, m+2)
-            prob_cons = _A(prob_mpc, Φ, Φ' * wbar, wbar)
+            prob_cons = ConstrainedProblem(prob_mpc, Φ, Φ' * wbar, wbar)
 
             _make_manifold_problem($OP, prob_mpc, new_u0, par, m;
                         check_dim, record_from_solution, project, get_radius,

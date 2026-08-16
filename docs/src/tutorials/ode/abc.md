@@ -183,17 +183,15 @@ prob = MPC.ManifoldProblem_BK(
                         )
 
 S_po = @time MPC.continuation(prob,
-                        Henderson(np0 = 6,
-                                  θmin = 0.001,
-                                  use_curvature = true,
+                        Henderson(use_curvature = true,
                                   ),
                         CoveringPar(max_charts = 20000,
-                                max_steps = 300,
-                                verbose = 1,
+                                max_steps = 500,
+                                # verbose = 1,
                                 newton_options = NewtonPar(tol = 1e-10, verbose = false),
-                                R0 = .5,
+                                Rmax = 0.5,
+                                R0 = .1,
                                 ϵ = 0.4,
-                                delta_angle = 4pi,
                                 )
                         )
 ```

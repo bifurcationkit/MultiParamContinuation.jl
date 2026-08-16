@@ -19,7 +19,7 @@ show(prob)
 We now compute a covering of the manifold 
 
 ```@example TUTTORUS
-S = continuation(prob,
+S = MPC.continuation(prob,
             Henderson(
                       use_curvature = true,
                       ),
@@ -28,7 +28,7 @@ S = continuation(prob,
                     verbose = 0,
                     newton_options = NonLinearSolveSpec(;maxiters = 5, abstol = 1e-12, reltol = 1e-10),
                     Rmax = .2, # maximal radius of validity
-                    R0 = .01, # initial radius of validity
+                    R0 = .05, # initial radius of validity
                     ϵ = 0.005, # used to estimated current radius
                     )
             )
