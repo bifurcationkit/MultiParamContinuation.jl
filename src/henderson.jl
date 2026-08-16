@@ -20,6 +20,8 @@ Base.@kwdef struct Henderson{T} <: AbstractCoveringAlgorithm
     np0::Int = 4
     "Adapt the radius of validity using a curvature estimate computed from second derivatives (Hessian)."
     use_curvature::Bool = false
+    "Safety factor for the curvature-based radius estimate `radius = radius_factor * sqrt(2ϵ / K)`. Defaults to `0.6`."
+    radius_factor::T = 0.6
     "[Internal] Maximal value of the adaptive fraction θ of the boundary ray. Must be <= 1."
     θmax::T = 1.0
     "[Internal] Minimal value of the adaptive fraction θ below which the search for a new chart is abandoned."
@@ -216,8 +218,8 @@ function _new_chart_from_guess(cache, chart, ω;
         return nothing
     end
     new_R = if cache.alg.use_curvature
-            K = get_curvature(cache.prob, u, Φ, cache.prob.params)
-            radius_estimate = sqrt(2ϵ / K)
+            K = get_curvature(cache.prob, u, Φ, cache.prob.params, weights)
+            radius_estimate = cache.alg.radius_factor * sqrt(2ϵ / K)
             new_R = max(Rmin, min(Rmax, radius_estimate, α * R))
             verbose && @error "Radius est" ϵ K radius_estimate R new_R
             new_R
