@@ -28,7 +28,7 @@ Sl = length(S)
 MPC.step!(S, 1000)
 @test length(S) == Sl
 MPC.check_alphas(S, S[1])
-MPC.test_P(S[1], S[2])
+MPC.test_P(S[1], S[2], MPC.Weight(MPC.TrivialWeight()))
 MPC.true_intersec_list(S, S[1])
 MPC.get_alpha(S[1], S[2])
 

@@ -96,7 +96,9 @@ function _make_manifold_problem(::Type{OP}, F, u0, par, m;
                                 get_tangent = nothing,
                                 event_function = event_default,
                                 finalize_solution = finalize_default,
-                                prob_cons = nothing) where {OP}
+                                prob_cons = nothing,
+                                weights = Weight(TrivialWeight()),
+                                ) where {OP}
     n = length(u0)
     if check_dim
         @assert n > m "This does not define an immersed manifold n = $n, m = $m"
@@ -106,7 +108,8 @@ function _make_manifold_problem(::Type{OP}, F, u0, par, m;
         event_function, finalize_solution,
         MultiParamContinuation.project_for_tree_default,
         prob_cons,
-        MultiParamContinuation.update_default)
+        MultiParamContinuation.update_default,
+        weights)
 end
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
@@ -183,7 +186,7 @@ function jacobian(pb::_A, w, p)
     vcat(J0, pb.Φ')
 end
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function project_on_M(prob, guess, chart::Chart, wbar, cpar::CoveringPar{T, <: BK.NewtonPar}) where {T}
+function project_on_M(prob, guess, chart::Chart, wbar, cpar::CoveringPar{T, <: BK.NewtonPar}, weights) where {T}
     if _has_projection(prob)
         return project(prob, guess, prob.params)
     else
@@ -193,7 +196,7 @@ function project_on_M(prob, guess, chart::Chart, wbar, cpar::CoveringPar{T, <: B
         end
         Φ = chart.Φ
         function f(w, p)
-            vcat(BK.residual(prob.VF, w, p), Φ' * (w - wbar))
+            vcat(BK.residual(prob.VF, w, p), apply_T(weights, Φ, w - wbar))
         end
         prob_bls = BifurcationProblem(f, guess, BK.getparams(prob.VF))
         sol = BK.solve(prob_bls, BK.Newton(), options)

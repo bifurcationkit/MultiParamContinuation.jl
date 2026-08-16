@@ -11,7 +11,7 @@ $TYPEDFIELDS
 
 ## Methods
 
-- `do_intersect(c1, c2)::Bool` whether the charts intersect
+- `do_they_intersect(c1, c2)::Bool` whether the charts intersect
 
 """
 mutable struct Chart{Tu, Ttg, Tr, Tp, Tin, Td, Teve, Tl}
@@ -112,6 +112,7 @@ Base.getindex(Ω::Atlas, k::Int) = getindex(Ω.atlas, k)
 Base.lastindex(Ω::Atlas) = lastindex(Ω.atlas)
 @inline get_boundary_list(Ω::Atlas) = Ω.BList
 @inline use_tree(Ω::Atlas) = Ω.alg.alg.use_tree
+@inline get_weights(Ω::Atlas) = get_weights(Ω.alg)
 
 # constructor
 function new_atlas(c::Tc, cache::Talg = nothing; dim::Int = 2) where {Tu, Ttg, Tc <: Chart{Tu, Ttg}, Talg}
@@ -174,9 +175,10 @@ This is an over-estimate on the charts that intersect c. Better look at `true_in
 """
 function intersec_list(Ω::Atlas, c::Chart, use_tree_bool::Bool = use_tree(Ω))
     Jᵢᵐ = Int[]
+    weights = get_weights(Ω)
     if ~use_tree_bool
         for cΩ in Ω.atlas
-            if do_intersect(cΩ, c)
+            if do_they_intersect(cΩ, c, weights)
                 push!(Jᵢᵐ, cΩ.index)
             end
         end
@@ -184,7 +186,7 @@ function intersec_list(Ω::Atlas, c::Chart, use_tree_bool::Bool = use_tree(Ω))
         @assert c.index <= length(Ω)
         list = neighbors(Ω.tree, Ω, c.index)
         for id in list
-            if do_intersect(Ω[id], c)
+            if do_they_intersect(Ω[id], c, weights)
                 push!(Jᵢᵐ, id)
             end
         end
@@ -196,7 +198,7 @@ end
 
 Function mainly for plotting.
 """
-function test_P(charti::Chart, chartj::Chart)
+function test_P(charti::Chart, chartj::Chart, weights)
     ui = charti.u
     Ri = charti.R
     Ti = charti.Φ
@@ -204,7 +206,7 @@ function test_P(charti::Chart, chartj::Chart)
     uj = chartj.u
     Rj = chartj.R
 
-    du = Ti' * (uj .- ui)
+    du = apply_T(weights, Ti, (uj .- ui))
     Bound = Ri^2 - Rj^2 + norm(du, 2)^2
     
     testp = [2dot(s, du) < Bound for s in charti.P]
@@ -216,22 +218,23 @@ end
 # function mainly for plotting
 function true_intersec_list(Ω::Atlas, c::Chart, use_tree_bool::Bool = use_tree(Ω))
     inter_list = intersec_list(Ω, c, use_tree_bool)
+    weights = get_weights(Ω)
     out = Int[]
     for id in inter_list
-        if ~test_P(c, Ω[id])
+        if ~test_P(c, Ω[id], weights)
             push!(out, id)
         end
     end
     out
 end
 
-function do_intersect(c1::Chart, c2::Chart)
+function do_they_intersect(c1::Chart, c2::Chart, weights)
     # !! TODO MAKE IT WORK ON GPU
     u1 = c1.u
     R1 = c1.R
     u2 = c2.u
     R2 = c2.R
-    return dist2(u1, u2) <= (R1 + R2)^2
+    return dist2(weights, u1, u2) <= (R1 + R2)^2
 end
 
 function Base.show(io::IO, Ω::Atlas{dim}) where {dim}

@@ -37,7 +37,7 @@ for (op, at) in ((:ManifoldProblem , :AbstractManifoldProblem),
                     )
     ```
     """
-    struct $op{Tu <: AbstractVector, Tp, TVF, Trec, Tproj, Ttangent, Tradius, Tevent, Tfinalize, Tbb, Tpc, Tupdate} <: $at
+    struct $op{Tu <: AbstractVector, Tp, TVF, Trec, Tproj, Ttangent, Tradius, Tevent, Tfinalize, Tbb, Tpc, Tupdate, Tw} <: $at
         "[Internal] input space dimension."
         n::Int
         "[Internal] output space dimension."
@@ -66,6 +66,8 @@ for (op, at) in ((:ManifoldProblem , :AbstractManifoldProblem),
         prob_cons::Tpc
         "Function used to update the problem after each continuation step. The signature is `update_problem!(prob, ::Atlas)`."
         update!::Tupdate
+        "Weight for changing the norm, scalar product, etc. Allows "
+        weights::Tw
     end
 
     Base.size(prob::$op) = (prob.n, prob.m)
@@ -74,6 +76,7 @@ for (op, at) in ((:ManifoldProblem , :AbstractManifoldProblem),
     @inline _has_tangent_computation(::$op{Tu, Tp, TVF, Trec, Tproj, Ttangent}) where {Tu, Tp, TVF, Trec, Tproj, Ttangent} = ~(Ttangent == Nothing)
     @inline _has_event(::$op{Tu, Tp, TVF, Trec, Tproj, Ttangent, Tradius, Tevent}) where {Tu, Tp, TVF, Trec, Tproj, Ttangent, Tradius, Tevent} = ~(Tevent == Nothing)
     @inline update_problem!(prob::$op, args...; kwargs...) = prob.update!(args...; kwargs...)
+    @inline get_weights(prob::$op) = prob.weights
 
     function $op(F, u0, par;
                     m = length(F(u0, par)),
@@ -86,7 +89,8 @@ for (op, at) in ((:ManifoldProblem , :AbstractManifoldProblem),
                     finalize_solution = finalize_default,
                     project_for_tree = project_for_tree_default,
                     prob_cons = nothing,
-                    update! = update_default
+                    update! = update_default,
+                    weights = Weight(TrivialWeight() ),
                     )
         n = length(u0)
         if check_dim
@@ -105,7 +109,8 @@ for (op, at) in ((:ManifoldProblem , :AbstractManifoldProblem),
             finalize_solution,
             project_for_tree,
             prob_cons,
-            update!)
+            update!,
+            weights)
         end
     end
 end

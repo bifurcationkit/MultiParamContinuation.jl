@@ -45,6 +45,7 @@ opts_cover = CoveringPar(max_charts = 1000,
     verbose = 1,
     newton_options = NewtonPar(tol = 1e-11, verbose = false),
     R0 = .31,
+    Rmax = 0.31,
     ϵ = 0.15,
     # delta_angle = 10.15,
     )

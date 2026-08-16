@@ -52,6 +52,7 @@ mutable struct HendersonCache{T1, T2 <: CoveringPar, T3, T4, T5}
     "[Internal] Cached right-hand side `[0; I(n-m)]` passed to `get_tangent` to compute the tangent space."
     _rhs_tangent::T5
 end
+@inline get_weights(cache::HendersonCache) = get_weights(cache.prob)
 
 """
 $SIGNATURES
@@ -131,11 +132,11 @@ function init(cache::HendersonCache)
     end
     # get tangent space
     T = get_tangent(prob, u0, prob.params, cache._rhs_tangent)
-    R = contparams.R0
-    Ps = init_polygonal_boundary(alg.np0, R)
+    R0 = contparams.R0
+    Ps = init_polygonal_boundary(alg.np0, R0)
     data = prob.recordFromSolution(u0, prob.params)
     eve = prob.event_function(u0, prob.params)
-    return new_chart(u0, T, R, Ps; id = 1, data, eve)
+    return new_chart(u0, T, R0, Ps; id = 1, data, eve)
 end
 
 function correct_guess(cache, nl_spec::NonLinearSolveSpec)
@@ -160,14 +161,16 @@ with initial guess u₀ + Φ * ω (where ω ∈ R²) and with (the same vector) 
 The constraint can be re-written
         Φ' * (x - u₀) + ω = 0.
 """
-function project_on_M(prob, guess, chart::Chart, wbar, cpar::CoveringPar{T1, <: NonLinearSolveSpec}) where {T1}
+function project_on_M(prob, guess, chart::Chart, wbar, cpar::CoveringPar{T1, <: NonLinearSolveSpec}, weights) where {T1}
     if _has_projection(prob)
         return project(prob, guess, prob.params)
     else
         nl_spec = cpar.newton_options
         Φ = chart.Φ
         function f(w, p)
-            vcat(prob.VF(w, p), Φ' * (w - wbar))
+            vcat(prob.VF(w, p), 
+                    apply_T(weights, Φ, w - wbar) # Φ' * (w - wbar)
+                    )
         end
         prob_bls = NonlinearProblem(f, guess, prob.params)
         sol = solve(prob_bls, nl_spec.nl_solver; nl_spec.options... )
@@ -185,12 +188,13 @@ Create a chart from guess after projecting it on the manifold.
 """
 function _new_chart_from_guess(cache, chart, ω; 
                                 R = cache.contparams.R0, 
-                                id = 0)
+                                id = 0,
+                                weights = Weight(TrivialWeight()))
     (;prob, contparams) = cache
     verbose = contparams.verbose > 1
     (;ϵ, Rmax, α) = contparams
     guess = chart.u .+ chart.Φ * ω
-    u = project_on_M(prob, guess, chart, copy(guess), contparams)
+    u = project_on_M(prob, guess, chart, copy(guess), contparams, weights)
     if isnothing(u)
         return nothing
     end
@@ -251,6 +255,7 @@ end
 function generate_new_chart(Ω::Atlas; id = length(Ω) + 1)
     Blist = get_boundary_list(Ω)
     guess = generate_exterior_vertex(Ω, Blist)
+    weights = get_weights(Ω)
     if isnothing(guess)
         return nothing
     end
@@ -267,12 +272,12 @@ function generate_new_chart(Ω::Atlas; id = length(Ω) + 1)
     while t > θmin
         verbose && println("----> iteration = ", iter, ", t = $t, from chart = ", c.index, "\n u = ", c.u[1:3])
         ω = t .* s
-        new_chart = _new_chart_from_guess(cache, c, ω; R = c.R, id)
+        new_chart = _new_chart_from_guess(cache, c, ω; R = c.R, id, weights)
         if isnothing(new_chart)
             @goto failed
         end
         # distance from guess to projected point
-        dst = norm(new_chart.u .- (c.u .+ c.Φ * ω), Inf)
+        dst = weighted_norm(weights, new_chart.u .- (c.u .+ c.Φ * ω))
         # angle between tangent spaces, do not compute if delta_angle large enough
         δα = delta_angle > pi ? zero(delta_angle) : abs(largest_principal_angle(c.Φ, new_chart.Φ))
         if δα > delta_angle || dst > ϵ
@@ -302,7 +307,7 @@ Change `charti.P` to satisfy halfspace condition. Does not mutate the second arg
 
 [2] Henry, Damennick B., and Daniel J. Scheeres. “Fully Numerical Computation of Heteroclinic Connection Families in the Spatial Three-Body Problem.” Communications in Nonlinear Science and Numerical Simulation 130 (March 2024): 107780. https://doi.org/10.1016/j.cnsns.2023.107780.
 """
-function remove_halfspace_first_chart!(charti::Chart, chartj::Chart)
+function remove_halfspace_first_chart!(charti::Chart, chartj::Chart, weights)
     ui = charti.u
     Ri = charti.R
     Ti = charti.Φ
@@ -310,7 +315,7 @@ function remove_halfspace_first_chart!(charti::Chart, chartj::Chart)
     uj = chartj.u
     Rj = chartj.R
 
-    du = Ti' * (uj .- ui)
+    du = apply_T(weights, Ti, (uj .- ui))
     Bound = Ri^2 - Rj^2 + norm(du, 2)^2
     
     testp = [2dot(s, du) < Bound for s in charti.P]
@@ -364,18 +369,19 @@ end
 
 function remove_halfspace!(Ω::Atlas, c1::Chart)
     verbose = Ω.alg.contparams.verbose > 1
+    weights = get_weights(Ω)
     int_list = intersec_list(Ω, c1)
     for id in int_list
         cΩ = Ω[id]
         @assert cΩ.index == id
         verbose && println("Merge c$(c1.index) with $(cΩ.index)")
-        remove_halfspace_first_chart!(c1, cΩ)
+        remove_halfspace_first_chart!(c1, cΩ, weights)
     end
     for id in int_list
         cΩ = Ω[id]
         @assert cΩ.index == id
         verbose && println("Merge c$(cΩ.index) with $(c1.index)")
-        remove_halfspace_first_chart!(cΩ, c1)
+        remove_halfspace_first_chart!(cΩ, c1, weights)
     end
 end
 
