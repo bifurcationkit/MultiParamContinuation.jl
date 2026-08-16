@@ -20,7 +20,7 @@ end
 prob = ManifoldProblem(F, [-0.,-0.,-1], nothing;
             finalize_solution = ProductSpace([-2,-0.8,-1],[2.,1,2]))
 
-S = continuation(prob,
+S = MPC.continuation(prob,
             Henderson(np0 = 4, 
                       θmin = 0.01,
                       use_curvature = true,

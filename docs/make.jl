@@ -2,8 +2,10 @@ using Pkg
 cd(@__DIR__)
 pkg" activate ."
 pkg" dev Documenter BifurcationKit"
+pkg" dev DocumenterCodeBlocks"
 
 using Documenter, BifurcationKit, MultiParamContinuation
+using DocumenterCodeBlocks
 
 # using DocThemeIndigo
 ENV["GKSwstype"] = "100"
@@ -19,6 +21,7 @@ makedocs(
 	warnonly = true,
 	sitename = "Multi parameter continuation in Julia",
 	authors = "Romain Veltz",
+	plugins = [CodeBlocks()],
 	format = Documenter.HTML(
 		collapselevel = 1,
 		assets=[
