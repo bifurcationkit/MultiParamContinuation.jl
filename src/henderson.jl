@@ -187,6 +187,8 @@ function _new_chart_from_guess(cache, chart, ω;
                                 R = cache.contparams.R0, 
                                 id = 0)
     (;prob, contparams) = cache
+    verbose = contparams.verbose > 1
+    (;ϵ, R0) = contparams
     guess = chart.u .+ chart.Φ * ω
     u = project_on_M(prob, guess, chart, copy(guess), contparams)
     if isnothing(u)
@@ -196,6 +198,15 @@ function _new_chart_from_guess(cache, chart, ω;
     if isnothing(Φ)
         return nothing
     end
+    new_R = if cache.alg.use_curvature
+            K = get_curvature(cache.prob, u, Φ, cache.prob.params)
+            radius_estimate = sqrt(2ϵ / K)
+            new_R = min(R0, radius_estimate)
+            verbose && @error "Radius est" K R radius_estimate new_R ϵ
+            new_R
+        else
+            R
+        end
     data = prob.recordFromSolution(u, prob.params)
     eve = prob.event_function(u, prob.params)
     label = if isnothing(eve)
@@ -203,10 +214,8 @@ function _new_chart_from_guess(cache, chart, ω;
     else
         eve * chart.event_values < 0 ? :EVE : Symbol() # TODO: not sure what this means
     end
-    return new_chart(u, 
-                Φ, 
-                R, 
-                init_polygonal_boundary(cache.alg.np0, R * 1); 
+    return new_chart(u, Φ, new_R, 
+                init_polygonal_boundary(cache.alg.np0, new_R * 1); 
                 id, data, eve, label)
 end
 
@@ -249,7 +258,7 @@ function generate_new_chart(Ω::Atlas; id = length(Ω) + 1)
     cache = Ω.alg
     contparams = cache.contparams
     verbose = contparams.verbose > 1
-    (;ϵ, delta_angle) = contparams
+    (; delta_angle, ϵ) = contparams
     t = cache.θ
     (;θmin, θmax) = cache.alg
     @assert 0 <= θmax <= 1
@@ -261,12 +270,6 @@ function generate_new_chart(Ω::Atlas; id = length(Ω) + 1)
         new_chart = _new_chart_from_guess(cache, c, ω; R = c.R, id)
         if isnothing(new_chart)
             @goto failed
-        end
-        if cache.alg.use_curvature
-            K = get_curvature(cache.prob, new_chart, cache.prob.params)
-            radius_estimate = sqrt(2ϵ / K)
-            new_chart.R = min(c.R, radius_estimate)
-            verbose && @error "Radius est" K c.R radius_estimate new_chart.R
         end
         # distance from guess to projected point
         dst = norm(new_chart.u .- (c.u .+ c.Φ * ω), Inf)

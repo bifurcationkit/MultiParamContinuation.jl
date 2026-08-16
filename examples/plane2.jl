@@ -19,9 +19,8 @@ prob = ManifoldProblem(F, zeros(3), nothing)
 S = continuation(prob,
             Henderson(np0 = 4),
             CoveringPar(max_charts = 20000, 
-                    max_steps = 100,
+                    max_steps = 200,
                     R0 = .1,
-                    ϵ = Inf,
                     delta_angle = Inf,
                     )
                 )

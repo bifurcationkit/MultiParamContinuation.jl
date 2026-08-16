@@ -20,11 +20,9 @@ contpar = CoveringPar(max_charts = 1500,
                                 verbose = 0,
                                 newton_options = NonLinearSolveSpec(;maxiters = 6, abstol = 1e-12),
                                 R0 = .2,
-                                ϵ = 0.015,
-                                # delta_angle = 10.15,
+                                ϵ = 0.01,
                                 ); 
-alg = Henderson(np0 = 6,
-                θmin = 0.001,
+alg = Henderson(
                 use_curvature = true
                 )
 
@@ -51,7 +49,7 @@ MPC.plot2d(S;
 step!(S,500)
 
 ###################################
-# figure 
+begin
 f = Figure(size = (800, 800))
 ax = Axis3(f[1,1], aspect = :data, elevation = pi/4, azimuth = -pi/2)
 MPC.plotd(ax, S; 
@@ -61,6 +59,4 @@ MPC.plotd(ax, S;
     # put_ids = true,
     ind_plot = 1:3)
 f
-
-ax = current_axis()
-ax.azimuth = -pi/3
+end

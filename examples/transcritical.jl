@@ -20,17 +20,15 @@ prob = ManifoldProblem(F, [-0.6,-0.6,-0.6], nothing;
             finalize_solution = Cube(1.1))
 
 S = continuation(prob,
-            Henderson(np0 = 4, 
+            Henderson(
                       θmin = 0.1,
                       use_curvature = true,
                       ),
             CoveringPar(max_charts = 20000,
-                    max_steps = 2000,
+                    max_steps = 5000,
                     verbose = 0,
                     newton_options = NonLinearSolveSpec(;maxiters = 6, abstol = 1e-12, reltol = 1e-10),
                     R0 = .1,
-                    ϵ = 0.005,
-                    delta_angle = 10.15,
                     ))
 
 MPC.plotd(S; 

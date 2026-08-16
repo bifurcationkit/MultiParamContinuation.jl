@@ -194,9 +194,9 @@ function project(prob, u0, par)
     prob.project(u0, par)
 end
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function get_curvature(prob, c::Chart{Tu}, par) where {𝒯, Tu <: AbstractVector{𝒯}}
-    u0 = c.u
-    Φ = c.Φ
+function get_curvature(prob, u0::AbstractVector{𝒯}, Φ, par) where {𝒯}
+    # u0 = c.u
+    # Φ = c.Φ
     n, m = size(prob)
     d = n - m
     J = jacobian(prob, u0, par)

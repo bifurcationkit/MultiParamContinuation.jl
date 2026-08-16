@@ -22,13 +22,11 @@ prob = ManifoldProblem(F, [1,1,0.], nothing)
 
 S = @time MPC.continuation(prob,
             Henderson(np0 = 4),
-            CoveringPar(max_charts = 1500, 
-                    max_steps = 2000,
+            CoveringPar(max_charts = 3000, 
+                    max_steps = 3000,
                     verbose = 0,
                     newton_options = NonLinearSolveSpec(;maxiters = 8),
-                    R0 = .15,
-                    ϵ = 0.1,
-                    delta_angle = Inf,
+                    R0 = .2,
                     ))
 
 f = MPC.plotd(S; 
@@ -52,16 +50,16 @@ step!(S, 1000)
 MPC.plotcenters(S)
 
 ###################################
-# figure for the README
-f = Figure(size = (800, 800))
-ax = Axis3(f[1,1], aspect = :data, elevation = pi/4, azimuth = -pi/2)
-MPC.plotd(ax, S; 
-    # draw_circle = true, 
-    draw_tangent = true, 
-    # plot_center = true,
-    # put_ids = true,
-    ind_plot = 1:3)
-f
-
-ax = current_axis()
-ax.azimuth = -pi/3
+begin
+    f = Figure(size = (800, 800))
+    ax = Axis3(f[1,1], aspect = :data, elevation = pi/4, azimuth = -pi/2)
+    MPC.plotd(ax, S; 
+        # draw_circle = true, 
+        draw_tangent = true, 
+        draw_edges = true,
+        # plot_center = true,
+        # put_ids = true,
+        ind_plot = 1:3
+    )
+    f
+end

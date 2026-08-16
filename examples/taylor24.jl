@@ -23,7 +23,7 @@ prob = ManifoldProblem(F, [0.2,0.2,-0.,0], nothing;
 )
 
 S = continuation(prob,
-            Henderson(np0 = 8, 
+            Henderson(np0 = 4, 
                       θmin = 0.05,
                       use_curvature = true,
                       use_tree = true,
@@ -33,14 +33,14 @@ S = continuation(prob,
                     verbose = 0,
                     newton_options = NonLinearSolveSpec(;maxiters = 8, abstol = 1e-12, reltol = 1e-10),
                     R0 = .03,
-                    ϵ = 0.02,
+                    # ϵ = 0.02,
                     # delta_angle = 10.15,
                     ))
 
 MPC.plotcenters(S)
-MPC.plotd(S)
+MPC.plotd(S, draw_edges = true,)
 
-step!(S, 5000);MPC.plotd(S; draw_edges = true,)
+step!(S, 5000);MPC.plotcenters(S)
 
 MPC.plot2d(S; 
     # draw_circle = true, 

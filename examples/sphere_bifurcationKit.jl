@@ -24,15 +24,13 @@ prob = ManifoldProblem_BK(F,
 # problem quand j'ajoute une charte
 S = MPC.continuation(prob,
             Henderson(np0 = 5,
-                        # use_curvature = true,
+                        use_curvature = true,
                         ),
             CoveringPar(max_charts = 20000, 
-                    max_steps = 250,
+                    max_steps = 300,
                     verbose = 0,
                     newton_options = NewtonPar(max_iterations = 5),
-                    R0 = .2,
-                    ϵ = 10.15,
-                    delta_angle = 10.1,
+                    R0 = .3,
                     )
             )
 

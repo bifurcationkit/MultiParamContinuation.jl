@@ -55,13 +55,15 @@ step!(S,1000);fig = MPC.plotd(S; draw_circle = false, ind_plot = 1:3)
 
 ###################################
 # figure for the README
-f = Figure(size = (800, 800))
-ax = Axis3(f[1,1], aspect = :data, elevation = pi/4, azimuth = -pi/3)
-MPC.plotd(ax, S; 
-    # draw_circle = true, 
-    draw_tangent = true, 
-    draw_edges = true,
-    # plot_center = true,
-    # put_ids = true,
-    ind_plot = 1:3)
-f
+begin
+    f = Figure(size = (800, 800))
+    ax = Axis3(f[1,1], aspect = :data, elevation = pi/4, azimuth = -pi/3)
+    MPC.plotd(ax, S; 
+        # draw_circle = true, 
+        draw_tangent = true, 
+        draw_edges = true,
+        # plot_center = true,
+        # put_ids = true,
+        ind_plot = 1:3)
+    f
+end

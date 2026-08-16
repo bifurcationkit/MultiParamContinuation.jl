@@ -20,9 +20,7 @@ contpar = CoveringPar(max_charts = 1500,
                                 max_steps = 320,
                                 verbose = 0,
                                 newton_options = NonLinearSolveSpec(;maxiters = 5, abstol = 1e-12, reltol = 1e-10),
-                                R0 = .25,
-                                # ϵ = 0.1,
-                                # delta_angle = 0.1,
+                                R0 = .3,
                                 ); 
 alg = Henderson(np0 = 4,
                 θmin = 0.001,
@@ -34,7 +32,7 @@ S = continuation(prob,
             contpar)
 
 MPC.plotd(S; 
-    draw_circle = true, 
+    # draw_circle = true, 
     draw_tangent = true,
     draw_edges = true,
     plot_center = true,

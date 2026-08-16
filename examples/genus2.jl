@@ -31,7 +31,7 @@ S = MPC.continuation(prob,
                     max_steps = 1300,
                     verbose = 0,
                     newton_options = NonLinearSolveSpec(;maxiters = 5, abstol = 1e-12),
-                    R0 = .25,
+                    R0 = .1,
                     ϵ = 0.025,
                     # delta_angle = 0.1,
                     ))

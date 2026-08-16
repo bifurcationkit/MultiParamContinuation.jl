@@ -31,7 +31,6 @@ S = MPC.continuation(prob,
                     newton_options = NonLinearSolveSpec(;maxiters = 6, abstol = 1e-12, reltol = 1e-10),
                     R0 = .1,
                     ϵ = 0.1,
-                    # delta_angle = 0.1,
                     ))
 
 MPC.plotd(S; 
@@ -45,7 +44,7 @@ step!(S,1000);fig = MPC.plotd(S, draw_edges = true)
 MPC.plotcenters(S)
 
 MPC.plot2d(S; 
-    draw_circle = true, 
+    # draw_circle = true, 
     draw_tangent = true, 
     plot_center = true,
     # put_ids = true,
