@@ -1,5 +1,4 @@
 module MultiParamContinuation
-    using CircularArrays: CircularVector
     using ForwardDiff
     using LinearAlgebra, Parameters
     using Base.Iterators: reverse
