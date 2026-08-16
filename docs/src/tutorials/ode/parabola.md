@@ -24,11 +24,11 @@ S = continuation(prob,
                       use_curvature = true,
                       ),
             CoveringPar(max_charts = 10000,
-                    max_steps = 1000,
+                    max_steps = 2000,
                     verbose = 0,
                     newton_options = NonLinearSolveSpec(;maxiters = 5, abstol = 1e-12, reltol = 1e-10),
                     Rmax = .2, # maximal radius of validity
-                    R0 = .15, # initial radius of validity
+                    R0 = .01, # initial radius of validity
                     ϵ = 0.005, # used to estimated current radius
                     )
             )

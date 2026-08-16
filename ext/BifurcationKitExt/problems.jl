@@ -27,12 +27,14 @@ for (M, OP) in ((:ManifoldProblem_BK, :ManifoldProblemBK),
                     get_tangent = nothing,
                     event_function = event_default,
                     finalize_solution = finalize_default,
-                    prob_cons = nothing)
+                    prob_cons = nothing,
+                    weights = Weight(TrivialWeight()),
+                    )
             bifprob = BifurcationProblem(F, u0, par, (@optic _))
             m = length(BK.residual(bifprob.VF, u0, par))
             _make_manifold_problem($OP, bifprob, u0, par, m;
                         check_dim, record_from_solution, project, get_radius,
-                        get_tangent, event_function, finalize_solution, prob_cons)
+                        get_tangent, event_function, finalize_solution, prob_cons, weights)
         end
 
         """
@@ -57,7 +59,8 @@ for (M, OP) in ((:ManifoldProblem_BK, :ManifoldProblemBK),
                     record_from_solution = record_from_solution_nothing,
                     event_function = event_default,
                     finalize_solution = finalize_default,
-                    jacobian = nothing)
+                    weights = Weight(TrivialWeight()),
+                    jacobian = nothing,)
             par = BK.getparams(prob_bk)
             m = length(BK.residual(prob_bk, prob_bk.u0, par))
 
