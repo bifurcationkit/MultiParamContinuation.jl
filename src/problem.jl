@@ -1,3 +1,7 @@
+abstract type AbstractTangentAlgorithm end
+struct QRDirectTangent <: AbstractTangentAlgorithm end
+struct BorderedTangent <: AbstractTangentAlgorithm end
+
 abstract type AbstractManifoldProblem end
 
 update_default(args...; kwargs...) = true
@@ -61,7 +65,7 @@ for op in (:ManifoldProblem, :ManifoldProblemBK)
     end
 
     Base.size(prob::$op) = (prob.n, prob.m)
-    @inline Base.eltype(prob::$op{Tu}) where Tu = eltype(Tu)
+    @inline Base.eltype(::$op{Tu}) where Tu = eltype(Tu)
     @inline _has_projection(::$op{Tu, Tp, TVF, Trec, Tproj}) where {Tu, Tp, TVF, Trec, Tproj} = ~(Tproj == Nothing)
     @inline _has_tangent_computation(::$op{Tu, Tp, TVF, Trec, Tproj, Ttangent}) where {Tu, Tp, TVF, Trec, Tproj, Ttangent} = ~(Ttangent == Nothing)
     @inline _has_event(::$op{Tu, Tp, TVF, Trec, Tproj, Ttangent, Tradius, Tevent}) where {Tu, Tp, TVF, Trec, Tproj, Ttangent, Tradius, Tevent} = ~(Tevent == Nothing)
@@ -127,13 +131,8 @@ function d2F(prob, u0, parms, dx1, dx2)
 end
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
-$SIGNATURES
-
-Compute an orthonormal basis `Φ` of the tangent space at `u0` of the manifold `F(u, par) = 0`.
-`Φ` is a matrix of size `n × (n-m)`.
-
-If the tangent computation is provided by the user (`prob.get_tangent`, with signature
-`get_tangent(u, par)`), it is used directly. Otherwise, `Φ` is obtained by solving the
+Compute a basis for the tangent space at point `u0` on F(u, par) = 0.
+If J is the jacobian dF(u0, par) and `k = n - m`, it is found by solving the
 bordered system
 
 ┌   ┐     ┌      ┐
@@ -141,32 +140,55 @@ bordered system
 │ T │     │I(n-m)│
 └   ┘     └      ┘
 
-where `J = jacobian(prob, u0, par)` (computed with BifurcationKit for a
-`ManifoldProblemBK`) and `T` is a random matrix. The result is orthonormalized by a QR
-factorization.
-
-## Arguments
-
-- `prob`: the manifold problem, a `ManifoldProblem` or a `ManifoldProblemBK`.
-- `u0`: point on the manifold.
-- `par`: parameters passed to `F`.
-- `RHS`: right hand side `[0; I(n-m)]`, cached by the continuation algorithm.
+where T is a random matrix (see `BorderedTangent`). Alternatively a direct QR
+factorization of `Jᵀ` can be used (see `QRDirectTangent`).
 """
 function get_tangent(prob, u0, par, RHS)
     if _has_tangent_computation(prob)
-        T = prob.get_tangent(u0, par)
+        return prob.get_tangent(u0, par)
     else
-        J = jacobian(prob, u0, par)
-        n, m = size(prob)
-        _A = vcat(J, rand(n-m, n))
-        T = _A \ RHS
-        _A = vcat(J, T')
-        T = _A \ RHS
-        fact = qr(T)
-        T = Matrix(fact.Q)
+        return _get_tangent_bordered(prob, u0, par, RHS)
     end
 end
 
+"""
+$TYPEDSIGNATURES
+
+Compute an orthonormal basis of the tangent space at `u0` by solving the bordered
+system `[J; T] Φ = [0; I(k)]`, with `J = jacobian(prob, u0, par)` and a random
+border `T` of size `k × n` (`k = n - m`).
+"""
+function _get_tangent_bordered(prob, u0, par, RHS)
+    J = jacobian(prob, u0, par)
+    n, m = size(prob)
+    _A = vcat(J, rand(n-m, n))
+    T = _A \ RHS
+    _A = vcat(J, T')
+    T = _A \ RHS
+    fact = qr(T)
+    T = Matrix(fact.Q)
+end
+
+"""
+$TYPEDSIGNATURES
+
+Compute an orthonormal basis of the tangent space at `u0` by a direct QR
+factorization of `Jᵀ`, with `J = jacobian(prob, u0, par)`. The last `n - m`
+columns of the full `Q` span the null space of `J`.
+"""
+function _get_tangent_QR(prob, u0, par, RHS)
+    J = jacobian(prob, u0, par)
+    n, m = size(prob)
+    F = qr(Matrix(J'))
+    Q = F.Q * Matrix{eltype(J)}(I, n, n)
+    return Q[:, m+1:n]
+end
+
+get_tangent(prob::ManifoldProblem{Tu, Tp, TVF, Trec, Tproj, BorderedTangent}, u0, par, RHS) where {Tu <: AbstractVector, Tp, TVF, Trec, Tproj} =
+    _get_tangent_bordered(prob, u0, par, RHS)
+
+get_tangent(prob::ManifoldProblem{Tu, Tp, TVF, Trec, Tproj, QRDirectTangent}, u0, par, RHS) where {Tu <: AbstractVector, Tp, TVF, Trec, Tproj} =
+    _get_tangent_QR(prob, u0, par, RHS)
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function project(prob, u0, par)
     prob.project(u0, par)

@@ -2,6 +2,9 @@ using Revise, Test, ForwardDiff, GLMakie
 using BifurcationKit
 const BK = BifurcationKit
 
+using MultiParamContinuation
+const MPC = MultiParamContinuation
+
 using Logging: global_logger
 using TerminalLoggers: TerminalLogger
 global_logger(TerminalLogger())
@@ -77,9 +80,6 @@ function build_mesh(S; k...)
     f
 end
 ####################################################################################################
-using MultiParamContinuation
-const MPC = MultiParamContinuation
-
 prob = MPC.ManifoldProblem_BK(
     prob_bk, br.sol[1].x, (@optic _.D), (@optic _.β);
     record_from_solution = (X, p; k...) -> begin
@@ -162,7 +162,7 @@ opts_po_cont = ContinuationPar(dsmax = 0.03, dsmin = 1e-4, ds = 0.0005, max_step
 
 br_po = BK.continuation(
     br, 1, opts_po_cont,
-    PeriodicOrbitOCollProblem(50, 4; jacobian = BK.DenseAnalyticalInplace());
+    Collocation(50, 4; jacobian = BK.DenseAnalyticalInplace());
     δp = 0.0001,
     linear_algo = BK.COPBLS(),
     # verbosity = 1,
@@ -171,8 +171,28 @@ br_po = BK.continuation(
     normC = norminf)
 
 BK.plot(br_po, br)
+####################################################################################################
+struct COPBLS_MPC{T} <: BK.AbstractLinearSolver
+    copbls::T
+end
+
+function (ls::COPBLS_MPC)(J, rhs; k...)
+    coll = ls.copbls.cache.coll
+    # @assert false
+    sol1 = BK.solve_cop(coll, J, rhs, ls.copbls.cache; _USELU = Val(false))
+    return sol1, true, 1
+end
+####################################################################################################
+using LinearAlgebra
+const coll = BK.get_discretization(BK.getprob(br_po))
+z0 = vcat(br_po.sol[1].x, br_po.sol[1].p, par_abc.β)
+
+prob = MPC.ManifoldProblem_BK(
+                        br_po.prob, br_po.sol[1].x, (@optic _.D), (@optic _.β),
                         record_from_solution = (X, p; k...) -> begin
-                            return (β = X[end], D = X[end-1], u3 = X[3])
+                            xtt = BK.get_periodic_orbit(coll, X[1:end-2], nothing)
+                            Max = maximum(xtt[3,:])
+                            return (u3 = Max, D = X[end-1], β = X[end], period = X[end-2])
                         end,
                         finalize_solution = (X,p) -> begin
                             D = X[end-1]
@@ -182,22 +202,48 @@ BK.plot(br_po, br)
                         end,
                         )
 
-S_eq = @time MPC.continuation(prob,
-                        Henderson(np0 = 3,
-                                    θmin = 0.001,
-                                    # use_curvature = true,
-                                    use_tree = true,
+Npo = length(coll)
+ls_po0 = br_po.alg.bls
+ls_po = BK.COPBLS(; cache = BK.COPCACHE(coll, Val(2)), solver = ls_po0.solver, J = ls_po0.J)
+
+S_po = @time MPC.continuation(prob,
+                        Henderson(np0 = 6,
+                                  θmin = 0.001,
+                                  use_curvature = true,
+                                    # use_tree = true,
                                   ),
                         CoveringPar(max_charts = 20000,
-                                max_steps = 1000,
-                                verbose = 0,
+                                max_steps = 100,
+                                # verbose = 1,
                                 newton_options = NewtonPar(tol = 1e-10, verbose = false),
-                                R0 = .04,
-                                ϵ = 0.1,
-                                delta_angle = 10.15,
-                                ))
+                                solver_bls = COPBLS_MPC(ls_po),
+                                R0 = .95,
+                                ϵ = 0.4,
+                                delta_angle = 4pi,
+                                )
+                        )
 
-MPC.plot2d(S_eq,ind_plot=4:5)
 
-plot_data(S_eq)
-build_mesh(S_eq)
+begin
+    # f = plot_data(S_po)# fil = u -> 1.57<u[end]<1.58 )
+    f = build_mesh(S_po)
+    ax = current_axis()
+    I = findall(0.15 .<= br.param .<= 0.5)
+    lines!(ax, br.param[I], fill(par_abc.β, length(I)), br.u3[I], linewidth = 5, color = :blue)
+    lines!(ax, br_po.param, fill(par_abc.β, length(br_po)), br_po.max, linewidth = 5, color = :red)
+    lines!(ax, br_po.param, fill(par_abc.β, length(br_po)), br_po.max, linewidth = 5, color = :red)
+    xlims!(ax, (0.15,0.5))
+    # plot_data!(ax, S_eq, cols = :blue)
+    f
+end
+
+
+f = build_mesh(S_po)
+
+begin
+    fig = Figure()
+    ax3 = Axis3(fig[1,1], zlabel = "u3", xlabel = "D", ylabel = "β", title = "PO $(length(S_po)) charts")
+    pts = mapreduce(c->[c.data[2], c.data[3], c.data[1]]', vcat, S_po.atlas)
+    scatter!(ax3, pts)
+    fig
+end
