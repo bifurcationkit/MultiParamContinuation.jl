@@ -25,7 +25,7 @@ module MultiParamContinuation
     export CoveringPar
     export Cube, ProductSpace
     export continuation, step!, ManifoldProblem, ManifoldProblem_BK
-    export Henderson, HendersonEllipse
+    export Henderson
     export Atlas, Chart
     export AABB, BVHNode, add!
 end

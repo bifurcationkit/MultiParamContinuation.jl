@@ -35,6 +35,10 @@ ManifoldProblem
 MultiParamContinuation.ManifoldProblemBK
 ```
 
+```@docs
+MultiParamContinuation.get_tangent
+```
+
 ## Continuation algorithms
 
 ```@docs

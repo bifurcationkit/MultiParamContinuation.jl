@@ -81,7 +81,6 @@ for op in (:ManifoldProblem, :ManifoldProblemBK)
                     update! = update_default
                     )
         n = length(u0)
-        dim = n-m
         if check_dim
             @assert n > m "This does not define an immersed manifold n = $n, m = $m"
         end
@@ -113,9 +112,9 @@ function ManifoldProblem_BK end
 
 function Base.show(io::IO, prob::AbstractManifoldProblem; prefix = "")
     n, m = size(prob)
-    println(prefix * "$(n-m)-d Manifold Problem")
-    println(prefix * "    ├─ n = ", prob.n)
-    println(prefix * "    └─ m = ", prob.m)
+    println(io, prefix * "$(n-m)-d Manifold Problem")
+    println(io, prefix * "    ├─ n = ", prob.n)
+    println(io, prefix * "    └─ m = ", prob.m)
 end
 
 function jacobian(prob::ManifoldProblem, u, p)
@@ -126,17 +125,32 @@ function d2F(prob, u0, parms, dx1, dx2)
     d1Fad(x,p,dx1) = ForwardDiff.derivative(t -> prob.VF(x .+ t .* dx1, p), zero(eltype(dx1)))
     ForwardDiff.derivative(t -> d1Fad(u0 .+ t .* dx2, parms, dx1), zero(eltype(dx1)))
 end
-
+#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
-Compute a basis for the tangent space at point `u0` on F(u, par) = 0.
-If J is the jacobian dF(u0, par), it is found by solving
+$SIGNATURES
+
+Compute an orthonormal basis `Φ` of the tangent space at `u0` of the manifold `F(u, par) = 0`.
+`Φ` is a matrix of size `n × (n-m)`.
+
+If the tangent computation is provided by the user (`prob.get_tangent`, with signature
+`get_tangent(u, par)`), it is used directly. Otherwise, `Φ` is obtained by solving the
+bordered system
 
 ┌   ┐     ┌      ┐
 │ J │ Φ = │  0   │
 │ T │     │I(n-m)│
 └   ┘     └      ┘
 
-where T is a random matrix.
+where `J = jacobian(prob, u0, par)` (computed with BifurcationKit for a
+`ManifoldProblemBK`) and `T` is a random matrix. The result is orthonormalized by a QR
+factorization.
+
+## Arguments
+
+- `prob`: the manifold problem, a `ManifoldProblem` or a `ManifoldProblemBK`.
+- `u0`: point on the manifold.
+- `par`: parameters passed to `F`.
+- `RHS`: right hand side `[0; I(n-m)]`, cached by the continuation algorithm.
 """
 function get_tangent(prob, u0, par, RHS)
     if _has_tangent_computation(prob)
@@ -153,10 +167,11 @@ function get_tangent(prob, u0, par, RHS)
     end
 end
 
+#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function project(prob, u0, par)
     prob.project(u0, par)
 end
-
+#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function get_curvature(prob, c::Chart{Tu}, par) where {T, Tu <: AbstractVector{T}}
     u0 = c.u
     Φ = c.Φ

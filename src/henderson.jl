@@ -3,7 +3,8 @@ abstract type AbstractCoveringAlgorithm end
 """
 $TYPEDEF
 
-Continuation algorithm from [1] computing implicitly defined 2d manifolds. 
+Covering algorithm from [1] computing implicitly defined 2d manifolds `F(u) = 0`,
+`F: ℝⁿ → ℝᵐ` with `n - m = 2`.
 
 ## Fields
 
@@ -15,39 +16,40 @@ $TYPEDFIELDS
 
 """
 Base.@kwdef struct Henderson{T} <: AbstractCoveringAlgorithm
-    "Number of initial vertices in the polyhedra on each tangent space."
+    "Number of vertices of the initial regular polyhedron approximating the ball of validity on each tangent space."
     np0::Int = 4
-    "Use hessian for curvature estimate."
+    "Adapt the radius of validity using a curvature estimate computed from second derivatives (Hessian)."
     use_curvature::Bool = false
-    "[Internal]"
+    "[Internal] Maximal value of the adaptive fraction θ of the boundary ray."
     θmax::T = 1.2
-    "[Internal]"
+    "[Internal] Minimal value of the adaptive fraction θ below which the search for a new chart is abandoned."
     θmin::T = 0.01
-    " Use tree to find neighbors. Useful when the number of charts is large because the complexity changes from N² to N⋅log(N)."
+    "Use a tree to find neighbors. Useful when the number of charts is large because the complexity changes from N² to N⋅log(N)."
     use_tree::Bool = false
-    "Number of children per leaf in the tree. Control the depth of the tree."
+    "Maximal number of charts per leaf of the BVH tree. Controls the depth of the tree."
     children_pre_leaf::Int = 5
 end
 
 """
 $TYPEDEF
 
-Cache for `::Henderson` algorithm. 
+Mutable cache holding the state of the `Henderson` covering algorithm and the
+parameters of its run.
 
 ## Fields
 
 $TYPEDFIELDS
 """
 mutable struct HendersonCache{T1, T2 <: CoveringPar, T3, T4, T5}
-    "A manifold problem"
+    "The manifold problem, e.g. a `ManifoldProblem` or a `ManifoldProblemBK`."
     const prob::T1
-    "Continuation parameters"
+    "Parameters of the covering algorithm."
     const contparams::T2
-    "Continuation algorithm"
+    "The covering algorithm, e.g. `Henderson()`."
     const alg::T3
-    "[Internal] Default value = 1"
+    "[Internal] Current fraction (in `[θmin, θmax]`) of the boundary ray used to place the center of a new chart. Adapted along the continuation; initialized to `one(eltype(prob))`."
     θ::T4
-    "[Internal] cache for storing the tangent space"
+    "[Internal] Cached right-hand side `[0; I(n-m)]` passed to `get_tangent` to compute the tangent space."
     _rhs_tangent::T5
 end
 

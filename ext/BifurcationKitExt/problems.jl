@@ -8,7 +8,7 @@ Make a manifold problem from a `BifurcationProblem`.
 """
 function ManifoldProblem_BK(F, u0, par;
                         check_dim::Bool = true,
-                        record_from_solution = (u,p;k...) -> nothing,
+                        record_from_solution = record_from_solution_nothing,
                         project = nothing,
                         get_radius = get_radius_default,
                         get_tangent = nothing,
@@ -47,7 +47,7 @@ end
 """
 $SIGNATURES
 
-Create a Bifurcation Problem with two parameter axes for which we continue the zeros.
+Bifurcation Problem with two parameter axes for which we continue the zeros.
 """
 struct BifurcationProblem_2P{T1, T2, T3}
     prob::T1
@@ -102,10 +102,10 @@ function ManifoldProblem_BK(prob_bk::BK.AbstractBifurcationProblem,
                             lens1, 
                             lens2;
                             check_dim::Bool = true,
-                            record_from_solution = record_from_solution_nothing,
                             project = nothing,
                             get_radius = get_radius_default,
                             get_tangent = nothing,
+                            record_from_solution = record_from_solution_nothing,
                             event_function = event_default,
                             finalize_solution = finalize_default)
     par = BK.getparams(prob_bk)
@@ -141,8 +141,7 @@ function ManifoldProblem_BK(prob_bk::BK.AbstractBifurcationProblem,
                         prob_cons,
                     )
 end
-
-##############################################################################################################
+#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function project_on_M(prob, guess, chart::Chart, wbar, cpar::CoveringPar{T, <: BK.NewtonPar}) where {T}
     if _has_projection(prob)
         return project(prob, guess, prob.params)
@@ -156,7 +155,7 @@ function project_on_M(prob, guess, chart::Chart, wbar, cpar::CoveringPar{T, <: B
             vcat(BK.residual(prob.VF, w, p), Φ' * (w - wbar))
         end
         prob_bls = BifurcationProblem(f, guess, BK.getparams(prob.VF))
-        sol = BK.solve(prob_bls, Newton(), options)
+        sol = BK.solve(prob_bls, BK.Newton(), options)
     end
     if BK.converged(sol)
         return sol.u
@@ -164,3 +163,4 @@ function project_on_M(prob, guess, chart::Chart, wbar, cpar::CoveringPar{T, <: B
         return nothing
     end
 end
+#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

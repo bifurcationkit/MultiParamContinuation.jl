@@ -15,7 +15,7 @@ function continuation(br::BK.ContResult,
                                         use_tree = false,
                                     ),
                         record_from_solution = BK.record_sol_default,
-                        continuationpar_bk::ContinuationPar = BK.getcontparams(br),
+                        continuationpar_bk::BK.ContinuationPar = BK.getcontparams(br),
                         finalize_solution = finalize_default_codim2,
                         options_bk = (
                                 jacobian_ma = BK.MinAugMatrixBased(),
