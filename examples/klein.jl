@@ -9,26 +9,29 @@ Makie.inline!(true)
 
 using MultiParamContinuation
 
-using Test, LinearAlgebra
+using Test, LinearAlgebra, StaticArrays
 const MPC = MultiParamContinuation
 
 function F(u, p) 
     x,y,z = u
     r = x^2+y^2+z^2
-    [(r+2*y-1)*((r-2*y-1)^2-8*z^2)+16*x*z*(r-2*y-1)]
+    SA[(r+2*y-1)*((r-2*y-1)^2-8*z^2)+16*x*z*(r-2*y-1)]
 end
 
-prob = ManifoldProblem(F, [1,1,0.], nothing)
-
-S = @time MPC.continuation(prob,
-            Henderson(np0 = 4),
-            CoveringPar(max_charts = 3000, 
-                    max_steps = 3000,
+prob = ManifoldProblem(F, SA[1,1,0.], nothing)
+alg = Henderson(np0 = 4, use_curvature = true)
+params = CoveringPar(max_charts = 3000, 
+                    max_steps = 1000,
                     verbose = 0,
                     newton_options = NonLinearSolveSpec(;maxiters = 8),
-                    Rmax = .2,
-                    R0 = 0.2,
-                    ))
+                    Rmax = .4,
+                    R0 = 0.1,
+                    ϵ = 0.05,
+                    )
+S = @time MPC.continuation(prob,
+            alg,
+            params
+            )
 
 f = MPC.plotd(S; 
     # draw_circle = true, 
@@ -46,7 +49,7 @@ MPC.plot2d(S;
     ind_plot = 1:3)
 
 
-step!(S, 1000)
+step!(S, 1000); MPC.plotd(S; draw_edges = true)
 
 MPC.plotcenters(S)
 

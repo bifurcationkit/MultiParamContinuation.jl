@@ -10,7 +10,7 @@ Makie.inline!(true)
 using MultiParamContinuation
 const MPC = MultiParamContinuation
 
-function F(u,p) 
+function F(u,p)
     x,y,z = u
     [2y*(y^2-3x^2)*(1-z^2)+(x^2+y^2)^2-(9z^2-1)*(1-z^2)]
 end

@@ -46,11 +46,14 @@ end
 
 weighted_orthonormalize(T, w::Weight) = _weighted_orthonormalize(T, get_weights(w))
 _weighted_orthonormalize(T, ::TrivialWeight) = Matrix(qr(T).Q)
+_weighted_orthonormalize(T::StA.StaticArray, ::TrivialWeight) = SMatrix(qr(T).Q)
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 _myrand(::AbstractArray{𝒯}, n, m) where {𝒯} = rand(𝒯, n, m)
+_myrand(::StA.StaticVector{N, 𝒯}, n, m) where {N, 𝒯} = rand(StA.SMatrix{n, m, 𝒯, n*m})
 
 @inline __myrhs(𝒯, m, dim) = vcat(zeros(𝒯, m, dim), I(dim))
 _myrhs(::AbstractArray{𝒯}, m, dim) where {𝒯} = __myrhs(𝒯, m, dim)
+_myrhs(::StA.StaticVector{N, 𝒯}, m, dim) where {N, 𝒯} = StA.SMatrix{m+dim, dim}(__myrhs(𝒯, m, dim))
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 abstract type AbstractJacobianType end
 

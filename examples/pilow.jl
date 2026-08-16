@@ -7,20 +7,20 @@ using GLMakie
 Makie.inline!(false)
 Makie.inline!(true)
 
-using MultiParamContinuation
+using MultiParamContinuation, StaticArrays
 using Test, LinearAlgebra
 const MPC = MultiParamContinuation
 
-F(u,p) = [u[1]^4 + u[2]^4 + u[3]^4 - u[1]^2 - u[2]^2 - u[3]^2]
+F(u,p) = SA[u[1]^4 + u[2]^4 + u[3]^4 - u[1]^2 - u[2]^2 - u[3]^2]
 
-prob = ManifoldProblem(F, [0,0,1.], nothing)
+prob = ManifoldProblem(F, SA[0,0,1.], nothing)
 
 contpar = CoveringPar(max_charts = 15000, 
                                 max_steps = 300,
                                 verbose = 0,
                                 newton_options = NonLinearSolveSpec(;maxiters = 6, abstol = 1e-12),
-                                Rmax = .3,
-                                R0 = 0.01,
+                                Rmax = .5,
+                                R0 = 0.05,
                                 ϵ = 0.005,
                                 ); 
 alg = Henderson(use_curvature = true)
@@ -52,6 +52,7 @@ ax = Axis3(f[1,1], aspect = :data, elevation = pi/4, azimuth = -pi/2)
 MPC.plotd(ax, S; 
     # draw_circle = true, 
     draw_tangent = true, 
+    draw_edges = true,
     # plot_center = true,
     # put_ids = true,
     ind_plot = 1:3)

@@ -29,8 +29,8 @@ S = continuation(prob,
                     verbose = 0,
                     newton_options = NonLinearSolveSpec(;maxiters = 6, abstol = 1e-12, reltol = 1e-10),
                     Rmax = .2,
-                    R0 = 0.01,
-                    ϵ = 0.01,
+                    R0 = 0.05,
+                    ϵ = 0.005,
                     ))
 
 MPC.plotd(S; 

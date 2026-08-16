@@ -205,7 +205,7 @@ function plotcenters(Σ::Atlas; size = (700,700), k...)
     if ~isnothing(Σ[1].data)
         centers = mapreduce(x -> x.data, hcat, Σ.atlas)
     else
-        centers = mapreduce(x -> x.u, hcat, Σ.atlas)
+        centers = mapreduce(x -> Array(x.u), hcat, Σ.atlas)
     end
     ax = Axis3(f[1,1], aspect = :data, title = "$(length(Σ)) charts")
     scatter!(ax, centers[1:3, :], color = centers[1,:])

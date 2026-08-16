@@ -9,15 +9,15 @@ Makie.inline!(true)
 
 using MultiParamContinuation
 
-using Test, LinearAlgebra
+using Test, LinearAlgebra, StaticArrays
 const MPC = MultiParamContinuation
 
-F(u,p) = [u[1]^2 + u[2]^2 + u[3]^2 - 1] # sphere
+F(u,p) = SA[u[1]^2 + u[2]^2 + u[3]^2 - 1] # sphere
 
 function get_tangent(u, par)
     # compute the normal
     n = u
-    n ./= norm(u)
+    n = n ./ norm(u)
     u0x, u0y, u0z = n
     
     if u0x !=1
@@ -42,24 +42,24 @@ function get_tangent(u, par)
     v1x=-v0y*u0z+v0z*u0y
     v1y=-v0z*u0x+v0x*u0z
     v1z=-v0x*u0y+v0y*u0x
-    T = [v0x v0y v0z;
+    T = SA[v0x v0y v0z;
          v1x v1y v1z]'
 end
 
 prob = ManifoldProblem(F, 
-                    [1. ,0, 0],
+                    SA[1. ,0, 0],
                     nothing;
                     get_tangent
                         )
-
-S = MPC.continuation(prob,
-            Henderson(np0 = 5,
-                        ),
-            CoveringPar(max_charts = 20000, 
+alg = Henderson(np0 = 5,)
+options = CoveringPar(max_charts = 20000, 
                     max_steps = 2500,
                     verbose = 0,
                     Rmax = .2,
                     )
+S = @time MPC.continuation(prob,
+            alg,
+            options
             )
 
 MPC.plotd(S; 

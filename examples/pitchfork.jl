@@ -17,8 +17,8 @@ function F(u,p)
     [z*x - x^3 + y/10]
 end
 
-prob = ManifoldProblem(F, [-0.,-0.,-1], nothing;
-            finalize_solution = ProductSpace([-2,-0.8,-1],[2.,1,2]))
+prob = ManifoldProblem(F, [-2.,-0.,-1], nothing;
+            finalize_solution = ProductSpace([-2,-0.8,-2],[2.,1,2]))
 
 S = MPC.continuation(prob,
             Henderson(np0 = 6, 
@@ -26,15 +26,16 @@ S = MPC.continuation(prob,
                       use_curvature = true,
                       ),
             CoveringPar(max_charts = 20000,
-                    max_steps = 200,
+                    max_steps = 2000,
                     verbose = 0,
                     newton_options = NonLinearSolveSpec(;maxiters = 6, abstol = 1e-12, reltol = 1e-10),
+                    Rmax = 0.5,
                     R0 = .1,
-                    ϵ = 0.1,
+                    ϵ = 0.01,
                     ))
 
 MPC.plotd(S; 
-    draw_circle = true,
+    # draw_circle = true,
     draw_tangent = true, 
     draw_edges = true,
     ind_plot = 1:3)
