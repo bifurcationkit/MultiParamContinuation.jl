@@ -34,6 +34,7 @@ S_eq = @time MPC.continuation(prob,
                                 verbose = 0,
                                 newton_options = NewtonPar(tol = 1e-10, verbose = false),
                                 R0 = .04,
+                                Rmax = .04,
                                 ϵ = 0.1,
                                 delta_angle = 10.15,
                                 ))

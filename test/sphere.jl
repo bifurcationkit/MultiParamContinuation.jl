@@ -16,6 +16,7 @@ S = MPC.continuation(prob,
                 max_steps = 300,
                 verbose = 2,
                 R0 = .2,
+                Rmax = 0.2,
                 ϵ = 10.15,
                 delta_angle = 10.1,
                 )

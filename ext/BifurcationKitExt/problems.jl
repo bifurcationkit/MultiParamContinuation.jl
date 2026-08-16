@@ -216,3 +216,24 @@ for BKP in (:ManifoldProblemBK, :ManifoldProblemBKMatrixFree)
         end
     end
 end
+#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+"""
+$TYPEDEF
+
+Marker to compute the tangent space of a `ManifoldProblemBK` by solving the bordered
+system with a `BifurcationKit` bordered linear solver `bls`. It enables matrix-free
+jacobians, e.g. `bls = BK.MatrixFreeBLS(BK.GMRESIterativeSolvers())`.
+
+Pass it as the `get_tangent` field of the manifold problem:
+
+    ManifoldProblem_BK(...; get_tangent = BLSBorderedTangent(bls))
+"""
+struct BLSBorderedTangent{Tbls} <: AbstractTangentAlgorithm
+    "BifurcationKit bordered linear solver used to solve the bordered system."
+    bls::Tbls
+end
+for BKP in (:ManifoldProblemBK, :ManifoldProblemBKMatrixFree)
+    @eval function get_tangent(prob::$BKP{Tu, Tp, TVF, Trec, Tproj, BLSBorderedTangent{Tbls}}, u0, par, RHS) where {Tu <: AbstractVector, Tp, TVF, Trec, Tproj, Tbls}
+        return _get_tangent_bordered(prob, u0, par, RHS, prob.get_tangent.bls)
+    end
+end

@@ -22,6 +22,7 @@ S = MPC.continuation(prob,
                     verbose = 0,
                     newton_options = NewtonPar(max_iterations = 5),
                     R0 = .2,
+                    Rmax = 0.2,
                     ϵ = 10.15,
                     delta_angle = 10.1,
                     )
