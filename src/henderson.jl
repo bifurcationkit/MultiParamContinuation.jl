@@ -253,6 +253,7 @@ end
 function generate_exterior_vertex(Ω::Atlas, clist::Vector{ <: Chart})
     Rmin = Ω.alg.contparams.Rmin
     for chart in clist
+        chart.R < Rmin && continue
         if is_on_boundary!(chart)
             for (ind, P) in pairs(chart.P)
                 if chart.inside_ball[ind] == false
@@ -311,6 +312,9 @@ function generate_new_chart(Ω::Atlas; id = length(Ω) + 1)
         iter +=1
 
     end
+    # persistent failure: mark the vertex so it is not retried at the next step
+    ind = findfirst(==(sₑ), c.P)
+    isnothing(ind) || (c.inside_ball[ind] = true)
     return nothing
 end
 
