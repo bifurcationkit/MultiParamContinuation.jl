@@ -186,11 +186,9 @@ function _get_tangent_QR(prob, u0, par, RHS)
     return Q[:, m+1:n]
 end
 
-get_tangent(prob::ManifoldProblem{Tu, Tp, TVF, Trec, Tproj, BorderedTangent}, u0, par, RHS) where {Tu <: AbstractVector, Tp, TVF, Trec, Tproj} =
-    _get_tangent_bordered(prob, u0, par, RHS)
+get_tangent(prob::ManifoldProblem{Tu, Tp, TVF, Trec, Tproj, BorderedTangent}, u0, par, RHS) where {Tu <: AbstractVector, Tp, TVF, Trec, Tproj} = _get_tangent_bordered(prob, u0, par, RHS)
 
-get_tangent(prob::ManifoldProblem{Tu, Tp, TVF, Trec, Tproj, QRDirectTangent}, u0, par, RHS) where {Tu <: AbstractVector, Tp, TVF, Trec, Tproj} =
-    _get_tangent_QR(prob, u0, par, RHS)
+get_tangent(prob::ManifoldProblem{Tu, Tp, TVF, Trec, Tproj, QRDirectTangent}, u0, par, RHS) where {Tu <: AbstractVector, Tp, TVF, Trec, Tproj} = _get_tangent_QR(prob, u0, par, RHS)
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function project(prob, u0, par)
     prob.project(u0, par)

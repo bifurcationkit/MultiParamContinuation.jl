@@ -205,7 +205,7 @@ function _new_chart_from_guess(cache, chart, ω;
     label = if isnothing(eve)
         Symbol()
     else
-        eve * chart.event_values < 0 ? :EVE : Symbol()
+        eve * chart.event_values < 0 ? :EVE : Symbol() # TODO: not sure what this means
     end
     return new_chart(u, 
                 Φ, 

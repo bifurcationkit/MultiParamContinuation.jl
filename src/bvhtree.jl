@@ -13,7 +13,7 @@ end
 Base.show(io::IO, box::AABB) = println(io, "AABB\n  ├─ lower = ", box.min, "\n  └─ upper = ", box.max)
 inside(aabb::AABB, point::AbstractVector) =  all(aabb.min[i] <= point[i] < aabb.max[i] for i in eachindex(point))
 Base.in(A::AABB, B::AABB) = inside(B, A.min) && inside(B, A.max)
-intersect(A::AABB, B::AABB) = inside(A, B.min) || inside(A, B.max)
+# intersect(A::AABB, B::AABB) = inside(A, B.min) || inside(A, B.max) # not used
 
 """
 $SIGNATURES
