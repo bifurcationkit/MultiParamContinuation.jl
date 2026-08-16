@@ -18,7 +18,7 @@ S = MPC.continuation(prob,
                         use_tree = true
                         ),
             CoveringPar(max_charts = 20000, 
-                    max_steps = 250,
+                    max_steps = 300,
                     verbose = 0,
                     newton_options = NewtonPar(max_iterations = 5),
                     R0 = .2,

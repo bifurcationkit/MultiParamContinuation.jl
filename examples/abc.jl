@@ -112,6 +112,19 @@ MPC.plot2d(S_eq,ind_plot=4:5)
 
 plot_data(S_eq)
 build_mesh(S_eq)
+
+begin
+    fig = Figure()
+    ax = Axis3(fig[1,1], zlabel = "β", xlabel = "D", ylabel = "α", title = "$(length(atlas_hopf)) charts")
+
+    MPC.plotd(ax, S_eq;
+        draw_tangent = true,
+        plot_center = false,
+        draw_edges = true,
+        ind_plot = (2, 3, 4)
+        )
+    fig
+end
 ####################################################################################################
 # Hopf continuation
 opts_cover = CoveringPar(max_charts = 1000,
@@ -139,10 +152,25 @@ atlas_hopf = @time MPC.continuation(deepcopy(br), 1,
             ),
     )
 
-fig = Figure()
-ax = Axis3(fig[1,1], zlabel = "β", xlabel = "D", ylabel = "α", title = "Hopf surface $(length(atlas_hopf)) charts")
-plot_data!(ax, atlas_hopf, ind = (4,5,6))
-fig
+begin
+    fig = Figure()
+    ax = Axis3(fig[1,1], zlabel = "β", xlabel = "D", ylabel = "α", title = "$(length(atlas_hopf)) charts")
+
+    MPC.plotd(ax, atlas_hopf;
+        draw_tangent = true,
+        plot_center = false,
+        draw_edges = true,
+        ind_plot = (4, 5, 6)
+        )
+    fig
+end
+
+begin
+    fig = Figure()
+    ax = Axis3(fig[1,1], zlabel = "β", xlabel = "D", ylabel = "α", title = "Hopf surface $(length(atlas_hopf)) charts")
+    plot_data!(ax, atlas_hopf, ind = (4,5,6))
+    fig
+end
 ####################################################################################################
 hopfpt = get_normal_form(br, 1)
 
@@ -166,7 +194,7 @@ br_po = BK.continuation(
     δp = 0.0001,
     linear_algo = BK.COPBLS(),
     # verbosity = 1,
-    plot = true,
+    # plot = true,
     argspo...,
     normC = norminf)
 
@@ -223,6 +251,7 @@ S_po = @time MPC.continuation(prob,
                                 )
                         )
 
+@time step!(S_po, 2_000)
 
 begin
     # f = plot_data(S_po)# fil = u -> 1.57<u[end]<1.58 )

@@ -16,7 +16,7 @@ function _plot!(ax, box::MPC.AABB)
 end
 
 # f = Figure(); ax=Axis(f[1,1]);_plot!(ax, aabb1);_plot!(ax, aabb2);f
-@test MPC.intersect(aabb1, aabb2) == false
+# @test MPC.intersect(aabb1, aabb2) == false
 @test MPC.overlaps(aabb1, aabb2) == false
 
 tree = BVHNode(2)

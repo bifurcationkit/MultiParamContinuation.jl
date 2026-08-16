@@ -11,7 +11,7 @@ using MultiParamContinuation
 
 const MPC = MultiParamContinuation
 
-function F(u,p) # CUSP
+function F(u,p)
     x,y,r,s=u
     [x*(x*x-y*y-r)-2*x*y*y-s, 2*x*x*y+y*(x*x-2*y*y-r)]
 end

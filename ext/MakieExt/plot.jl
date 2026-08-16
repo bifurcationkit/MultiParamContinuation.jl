@@ -1,6 +1,7 @@
 using Makie.Colors
 using Makie.GeometryBasics
 using StaticArrays
+using LinearAlgebra
 
 @inline get_tangent(A::AbstractMatrix, i::Int) = @view A[:, i]
 
@@ -270,8 +271,6 @@ function plot2d(Σ::Atlas; size = (700,700),
     end
     f
 end 
-
-using LinearAlgebra
 
 function plot2d_improved!(_polygons, Σ; ind_plot = 1:2, k...)
     tmp = copy(Σ[1].u)

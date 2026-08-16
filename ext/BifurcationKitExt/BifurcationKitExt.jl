@@ -19,6 +19,7 @@ module BifurcationKitExt
                                     _has_tangent_computation,
                                     jacobian,
                                     d2F,
+                                    get_curvature,
                                     continuation,
                                     CoveringPar,
                                     AbstractTangentAlgorithm,

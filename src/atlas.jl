@@ -77,6 +77,7 @@ function get_alpha(c1::Chart, c2::Chart)
     R1 = c1.R
     R2 = c2.R
     α₁₂ = (1 + (R1 - R2) * (R1 + R2)) / 2
+    return α₁₂
 end
 
 """
@@ -91,13 +92,9 @@ $TYPEDFIELDS
 ## Methods
 
 - `add!(a::Atlas, c::Chart)`
-
 - `new_atlas(c::Chart, alg = nothing; dim = 2)`
-
 - `length(a::Atlas)` returns the number of charts
-
 - `a[3]` returns the 3rd chart in the atlas `a`, see `?Chart`
-
 """
 struct Atlas{dim, Tc, Talg, Ttree}
     "List of Charts"
@@ -125,6 +122,17 @@ function new_atlas(c::Tc, cache::Talg = nothing; dim::Int = 2) where {Tu, Ttg, T
         add!(Ω.tree, Ω, length(Ω))
     end
     return Ω
+end
+
+function println_current_chart(n_steps, Ω)
+    println("━"^50 * "\n─── step     = ", n_steps)
+    println(" ├─ # charts = ", length(Ω))
+    println(" └─ new boundary chart R = ", Ω[end].R)
+    println("           ├─         u[1:3] = ", Ω[end].u[1:3])
+    if ~isnothing(Ω[end].data)
+    println("           ├─         data   = ", Ω[end].data)
+    end
+    println("           └─         id = ", Ω[end].index)
 end
 
 # add chart to atlas

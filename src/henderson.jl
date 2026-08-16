@@ -20,8 +20,8 @@ Base.@kwdef struct Henderson{T} <: AbstractCoveringAlgorithm
     np0::Int = 4
     "Adapt the radius of validity using a curvature estimate computed from second derivatives (Hessian)."
     use_curvature::Bool = false
-    "[Internal] Maximal value of the adaptive fraction θ of the boundary ray."
-    θmax::T = 1.2
+    "[Internal] Maximal value of the adaptive fraction θ of the boundary ray. Must be <= 1."
+    θmax::T = 1.0
     "[Internal] Minimal value of the adaptive fraction θ below which the search for a new chart is abandoned."
     θmin::T = 0.01
     "Use a tree to find neighbors. Useful when the number of charts is large because the complexity changes from N² to N⋅log(N)."
@@ -68,23 +68,16 @@ function continuation(prob::AbstractManifoldProblem,
     n, m = size(prob)
     dim = n - m
     cache = HendersonCache(prob, contparams, alg, θ, vcat(zeros(m, dim), I(dim)))
+
     chart0 = init(cache)
     n, m = size(prob)
     Ω = new_atlas(chart0, cache; dim = n - m )
     update_boundary!(Ω)
+
     n_steps = 1
-    while length(Ω) < contparams.max_charts && 
-            n_steps < contparams.max_steps
+    while length(Ω) < contparams.max_charts &&  n_steps < contparams.max_steps
         if _verbose
-            println("━"^50)
-            println("─── step     = ", n_steps)
-            println(" ├─ # charts = ", length(Ω))
-            println(" └─ new boundary chart R = ", Ω[end].R)
-            println("           ├─         u[1:3] = ", Ω[end].u[1:3])
-            if ~isnothing(Ω[end].data)
-                println("           ├─         data   = ", Ω[end].data)
-            end
-            println("           └─         id = ", Ω[end].index)
+            println_current_chart(n_steps, Ω)
         end
         if ~step!(Ω)
             return Ω
@@ -92,7 +85,7 @@ function continuation(prob::AbstractManifoldProblem,
         n_steps += 1
     end
     return Ω
-end 
+end
 
 """
 $SIGNATURES
@@ -125,7 +118,7 @@ function step!(Ω::Atlas, n::Int)
     @progress for _ in Base.OneTo(n)
         step!(Ω)
     end
-    Ω
+    return Ω
 end
 
 function init(cache::HendersonCache)
@@ -165,15 +158,15 @@ Compute the projection of guess on the manifold M around chart (u₀, Φ). Found
         └                 ┘
 with initial guess u₀ + Φ * ω (where ω ∈ R²) and with (the same vector) wbar = u₀ + Φ * ω.
 The constraint can be re-written
-        Φ' * (x - u₀) + ω.
+        Φ' * (x - u₀) + ω = 0.
 """
-function project_on_M(prob, guess, chart::Chart, wbar, cpar::CoveringPar{T, <: NonLinearSolveSpec}) where {T}
+function project_on_M(prob, guess, chart::Chart, wbar, cpar::CoveringPar{T1, <: NonLinearSolveSpec}) where {T1}
     if _has_projection(prob)
         return project(prob, guess, prob.params)
     else
         nl_spec = cpar.newton_options
         Φ = chart.Φ
-        function f(w,p)
+        function f(w, p)
             vcat(prob.VF(w, p), Φ' * (w - wbar))
         end
         prob_bls = NonlinearProblem(f, guess, prob.params)
@@ -191,8 +184,8 @@ end
 Create a chart from guess after projecting it on the manifold.
 """
 function _new_chart_from_guess(cache, chart, ω; 
-                    R = cache.contparams.R0, 
-                    id = 0)
+                                R = cache.contparams.R0, 
+                                id = 0)
     (;prob, contparams) = cache
     guess = chart.u .+ chart.Φ * ω
     u = project_on_M(prob, guess, chart, copy(guess), contparams)
@@ -200,6 +193,9 @@ function _new_chart_from_guess(cache, chart, ω;
         return nothing
     end
     Φ = get_tangent(prob, u, prob.params, cache._rhs_tangent)
+    if isnothing(Φ)
+        return nothing
+    end
     data = prob.recordFromSolution(u, prob.params)
     eve = prob.event_function(u, prob.params)
     label = if isnothing(eve)
@@ -210,28 +206,25 @@ function _new_chart_from_guess(cache, chart, ω;
     return new_chart(u, 
                 Φ, 
                 R, 
-                (init_polygonal_boundary(
-                        cache.alg.np0, 
-                        R * 1)); 
+                init_polygonal_boundary(cache.alg.np0, R * 1); 
                 id, data, eve, label)
 end
 
-function get_interior_vertex_in_T(c::Chart, sₑ, ds = 1)
+function generate_interior_vertex(c::Chart, sₑ, ds = 1)
     uᵢ = c.u
     # get vertex inside ball
     # this vertex is null here
-    if false #keep this please!
+    if false #TODO: keep this please!
         sᵢ = c.Φ' * (uᵢ - c.u)
         # project in tangent space
         s = sₑ - sᵢ
     end
-    # s = copy(sₑ)
     # get vertex at the intersection between the ray s and the Ball B(0, R)
     s = sₑ .* (c.R / norm(sₑ) * ds)
     return s
 end
 
-function generate_exterior_vertex(Ω::Atlas, clist::Vector{<: Chart})
+function generate_exterior_vertex(::Atlas, clist::Vector{ <: Chart})
     for chart in clist
         if is_on_boundary!(chart)
             for (ind, P) in pairs(chart.P)
@@ -259,10 +252,11 @@ function generate_new_chart(Ω::Atlas; id = length(Ω) + 1)
     (;ϵ, delta_angle) = contparams
     t = cache.θ
     (;θmin, θmax) = cache.alg
+    @assert 0 <= θmax <= 1
     iter = 1
-    s = get_interior_vertex_in_T(c, sₑ)
+    s = generate_interior_vertex(c, sₑ)
     while t > θmin
-        verbose && println("----> iteration = ", iter, ", t = $t, from chart = ", c.index, "\n u = ", c.u)
+        verbose && println("----> iteration = ", iter, ", t = $t, from chart = ", c.index, "\n u = ", c.u[1:3])
         ω = t .* s
         new_chart = _new_chart_from_guess(cache, c, ω; R = c.R, id)
         if isnothing(new_chart)
@@ -384,14 +378,14 @@ function remove_halfspace!(Ω::Atlas, c1::Chart)
 end
 
 ### TODO REMOVE THIS FUNCTION
-function _remove_halfspace!(Ω::Atlas, c1::Chart)
-    verbose = Ω.alg.contparams.verbose > 0
-    int_list = intersec_list(Ω, c1)
-    for index in int_list
-        cΩ = Ω[id]
-        @assert cΩ.index == id
-        verbose && println("Merge c$(c1.index) with $(cΩ.index)")
-        remove_halfspace_first_chart!(c1, cΩ)
-    end
-    c1
-end
+# function _remove_halfspace!(Ω::Atlas, c1::Chart)
+#     verbose = Ω.alg.contparams.verbose > 0
+#     int_list = intersec_list(Ω, c1)
+#     for index in int_list
+#         cΩ = Ω[id]
+#         @assert cΩ.index == id
+#         verbose && println("Merge c$(c1.index) with $(cΩ.index)")
+#         remove_halfspace_first_chart!(c1, cΩ)
+#     end
+#     c1
+# end

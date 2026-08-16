@@ -25,7 +25,7 @@ S = continuation(prob,
         cpar)
 
 @test S[1] isa MPC.Chart
-@test length(S) == 109
+@test length(S) == 144
 
 S = continuation(prob,
         Henderson(np0 = 5,
@@ -36,8 +36,7 @@ S = continuation(prob,
         )
 
 @test S[1] isa MPC.Chart
-@test length(S) == 109
-
+@test length(S) == 144
 
 prob = ManifoldProblem(F, SA[0.,0,0], nothing;
                         get_tangent = (u,p) -> SA[1 0; 0 1; 0 0],
@@ -51,7 +50,7 @@ S = continuation(prob,
         cpar)
 
 @test S[1] isa MPC.Chart
-@test length(S) == 109
+@test length(S) == 144
 
 show(S)
 show(S[1])
