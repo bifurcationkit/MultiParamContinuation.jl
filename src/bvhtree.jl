@@ -149,7 +149,7 @@ end
 
 function add!(node::BVHNode, S::Atlas, id::Int)
     if isnothing(node.left_child) &&
-        isnothing(node.left_child)
+        isnothing(node.right_child)
         if npoints(node) < node.max_size && is_leaf(node)
             # node is leaf with enough space, add id to chart_ids
             push!(node.chart_ids, id)
@@ -176,14 +176,25 @@ function add!(node::BVHNode, S::Atlas, id::Int)
             node.left_child = BVHNode(length(S[id].u);parent = node, split_dim = 0, max_size = node.max_size)
             node.right_child = BVHNode(length(S[id].u);parent = node, split_dim = 0, max_size = node.max_size)
 
-            #!!!! empty chart_ids
-            for id in node_ids
-                if S[id].u[split_dim] < split_value
-                    add!(node.left_child, S, id)
-                else
-                    add!(node.right_child, S, id)
-                end
+            # partition of the ids. The median split may leave one side empty
+            # (e.g. all points share the same coordinate along `split_dim`),
+            # in which case we fall back to a half/half partition to guarantee
+            # that the recursion terminates.
+            ids_left  = [i for i in node_ids if S[i].u[split_dim] <  split_value]
+            ids_right = [i for i in node_ids if S[i].u[split_dim] >= split_value]
+            if isempty(ids_left) || isempty(ids_right)
+                mid = cld(length(node_ids), 2)
+                ids_left  = collect(node_ids[1:mid])
+                ids_right = collect(node_ids[mid+1:end])
             end
+
+            for i in ids_left
+                add!(node.left_child, S, i)
+            end
+            for i in ids_right
+                add!(node.right_child, S, i)
+            end
+
             empty!(node.chart_ids)
         end
     else
