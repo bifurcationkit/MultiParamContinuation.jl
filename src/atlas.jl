@@ -101,7 +101,7 @@ struct Atlas{dim, Tc, Talg, Ttree}
     atlas::Vector{Tc}
     "[Internal] Boundary list of charts"
     BList::Vector{Tc} # Cf Henderson - 2002
-    "Algorithm, for example: `Henderson()`"
+    "Algorithm cache, for example: `Henderson()`"
     alg::Talg
     "[Internal] Tree for neighbors search"
     tree::Ttree

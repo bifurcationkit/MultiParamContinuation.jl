@@ -15,8 +15,8 @@ const MPC = MultiParamContinuation
 F(u,p) = [u[1]^2 + u[2]^2 + p.R * u[3]^2 - 1]
 
 prob = ManifoldProblem(F, 
-                    [0. ,0, 1],
-                    (R = 3.,);
+                    [0., 0, 1],
+                    (R = 5.,);
                         )
 
 S = MPC.continuation(prob,
@@ -25,9 +25,12 @@ S = MPC.continuation(prob,
                         use_curvature = true,
                         ),
             CoveringPar(max_charts = 20000, 
-                    max_steps = 500,
+                    max_steps = 2000,
                     verbose = 0,
-                    R0 = .2,
+                    Rmax = 0.2,
+                    R0 = 0.1,
+                    ϵ = 0.005,
+                    α = 1.3
                     )
             )
 

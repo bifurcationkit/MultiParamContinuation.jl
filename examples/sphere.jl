@@ -54,14 +54,11 @@ prob = ManifoldProblem(F,
 
 S = MPC.continuation(prob,
             Henderson(np0 = 5,
-                        use_curvature = true,
                         ),
             CoveringPar(max_charts = 20000, 
                     max_steps = 2500,
                     verbose = 0,
-                    R0 = .2,
-                    # ϵ = 10.,
-                    # delta_angle = 10.1,
+                    Rmax = .2,
                     )
             )
 

@@ -26,7 +26,8 @@ S = @time MPC.continuation(prob,
                     max_steps = 3000,
                     verbose = 0,
                     newton_options = NonLinearSolveSpec(;maxiters = 8),
-                    R0 = .2,
+                    Rmax = .2,
+                    R0 = 0.2,
                     ))
 
 f = MPC.plotd(S; 

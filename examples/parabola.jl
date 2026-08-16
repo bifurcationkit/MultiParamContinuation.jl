@@ -13,7 +13,7 @@ const MPC = MultiParamContinuation
 
 F(u,p) = [u[1]^12 + u[2]^12 - u[3]]
 
-prob = ManifoldProblem(F, [0,0,0.], nothing;
+prob = ManifoldProblem(F, zeros(3), nothing;
             finalize_solution = (u,p) -> (u[3] < 2) * (u[1]>-0.1) * (u[2]>-0.1))
 
 S = continuation(prob,
@@ -21,10 +21,11 @@ S = continuation(prob,
                       use_curvature = true,
                       ),
             CoveringPar(max_charts = 20000,
-                    max_steps = 2000,
-                    verbose = 0,
+                    max_steps = 1000,
+                    # verbose = 2,
                     newton_options = NonLinearSolveSpec(;maxiters = 5, abstol = 1e-12, reltol = 1e-10),
-                    R0 = .15,
+                    Rmax = .2,
+                    R0 = 0.01,
                     ϵ = 0.005,
                     ))
 

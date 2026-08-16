@@ -32,8 +32,9 @@ S = continuation(prob,
                     max_steps = 2000,
                     verbose = 0,
                     newton_options = NonLinearSolveSpec(;maxiters = 8, abstol = 1e-12, reltol = 1e-10),
-                    R0 = .03,
-                    # ϵ = 0.02,
+                    Rmax = .1,
+                    R0 = 0.01,
+                    ϵ = 0.02,
                     # delta_angle = 10.15,
                     ))
 

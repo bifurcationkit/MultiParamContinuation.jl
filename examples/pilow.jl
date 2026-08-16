@@ -15,16 +15,15 @@ F(u,p) = [u[1]^4 + u[2]^4 + u[3]^4 - u[1]^2 - u[2]^2 - u[3]^2]
 
 prob = ManifoldProblem(F, [0,0,1.], nothing)
 
-contpar = CoveringPar(max_charts = 1500, 
-                                max_steps = 1800,
+contpar = CoveringPar(max_charts = 15000, 
+                                max_steps = 300,
                                 verbose = 0,
                                 newton_options = NonLinearSolveSpec(;maxiters = 6, abstol = 1e-12),
-                                R0 = .2,
-                                ϵ = 0.01,
+                                Rmax = .3,
+                                R0 = 0.01,
+                                ϵ = 0.005,
                                 ); 
-alg = Henderson(
-                use_curvature = true
-                )
+alg = Henderson(use_curvature = true)
 
 S = @time MPC.continuation(prob,
             alg,
@@ -45,9 +44,7 @@ MPC.plot2d(S;
     ind_plot = [2,1]
     )
 
-
-step!(S,500)
-
+step!(S,5000)
 ###################################
 begin
 f = Figure(size = (800, 800))

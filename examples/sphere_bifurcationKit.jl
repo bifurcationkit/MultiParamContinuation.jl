@@ -27,10 +27,12 @@ S = MPC.continuation(prob,
                         use_curvature = true,
                         ),
             CoveringPar(max_charts = 20000, 
-                    max_steps = 300,
+                    max_steps = 500,
                     verbose = 0,
                     newton_options = NewtonPar(max_iterations = 5),
-                    R0 = .3,
+                    Rmax = .3,
+                    R0 = 0.1,
+                    ϵ = 0.05,
                     )
             )
 

@@ -188,7 +188,7 @@ function _new_chart_from_guess(cache, chart, ω;
                                 id = 0)
     (;prob, contparams) = cache
     verbose = contparams.verbose > 1
-    (;ϵ, R0) = contparams
+    (;ϵ, Rmax, α) = contparams
     guess = chart.u .+ chart.Φ * ω
     u = project_on_M(prob, guess, chart, copy(guess), contparams)
     if isnothing(u)
@@ -201,8 +201,8 @@ function _new_chart_from_guess(cache, chart, ω;
     new_R = if cache.alg.use_curvature
             K = get_curvature(cache.prob, u, Φ, cache.prob.params)
             radius_estimate = sqrt(2ϵ / K)
-            new_R = min(R0, radius_estimate)
-            verbose && @error "Radius est" K R radius_estimate new_R ϵ
+            new_R = min(Rmax, radius_estimate, α * R)
+            verbose && @error "Radius est" ϵ K radius_estimate R new_R
             new_R
         else
             R
@@ -284,12 +284,11 @@ function generate_new_chart(Ω::Atlas; id = length(Ω) + 1)
             end
             return new_chart
         end
-        # alg.θ = min(1.1 * alg.θ, 1.)
-        # c.R *= 1.005
 
         @label failed
         t *= 0.8
         iter +=1
+
     end
     return nothing
 end

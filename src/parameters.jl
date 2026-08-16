@@ -40,6 +40,10 @@ $TYPEDFIELDS
     R0::T = 0.1
     "[Internal] Minimal radius of polyhedra."
     Rmin::T = 0.001
+    "[Internal] Maximal radius of polyhedra."
+    Rmax::T = 0.1
+    "Mulitplicative factor for increasing the validity radius. Cannot be larger than α * current radius."
+    α::T = 1.05
     "Maximum angle difference between charts' tangent spaces in radians."
     delta_angle::T = 2π
     "Maximum number of charts."
@@ -54,6 +58,6 @@ $TYPEDFIELDS
     solver_bls::Tbls = nothing
     "[Internal]."
     dotmin::T = 0.2
-    @assert ϵ > 0 && R0 > 0 && Rmin > 0
+    @assert ϵ > 0 && Rmax >= R0 >= Rmin > 0
     @assert verbose in 0:3
 end

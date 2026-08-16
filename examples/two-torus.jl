@@ -28,7 +28,8 @@ S = continuation(prob,
                     max_steps = 2000,
                     verbose = 0,
                     newton_options = NonLinearSolveSpec(;maxiters = 5, abstol = 1e-12, reltol = 1e-10),
-                    R0 = .03,
+                    Rmax = .03,
+                    R0 = 0.01,
                     ϵ = 0.01,
                     # delta_angle = 10.01,
                     ))
@@ -40,7 +41,6 @@ MPC.plotd(S;
     )
 
 step!(S, 3000);fig = MPC.plotd(S; draw_circle = false, draw_edges = true)
-
 
 MPC.plotcenters(S)
 
