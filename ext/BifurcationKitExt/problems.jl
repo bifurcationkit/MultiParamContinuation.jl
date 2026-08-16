@@ -52,7 +52,10 @@ for (M, OP) in ((:ManifoldProblem_BK, :ManifoldProblemBK),
         `jacobian` keyword. It defaults to `nothing` (jacobian of `prob_bk` for the state
         block and automatic differentiation for the two parameter blocks). Otherwise pass
         a `BifurcationKit` jacobian marker, e.g. `BK.AutoDiffDense()`, `BK.AutoDiffMF()`,
-        `BK.MatrixFree()` or `BK.FiniteDifferences()`.
+        `BK.MatrixFree()` or `BK.FiniteDifferencesMF()`.
+
+        The metric of the embedding space can be changed with the `weights` keyword, see
+        [`ManifoldProblem`](@ref).
         """
         function $M(prob_bk::BK.AbstractBifurcationProblem,
                     u0::AbstractVector,
@@ -170,8 +173,8 @@ end
 _jacobian_2P(pb::BifurcationProblem_2P, ::BK.AutoDiffDense, Z, par) =
     ForwardDiff.jacobian(z -> pb(z, par), Z)
 
-# Matrix-free jacobian: return the jacobian-vector product `dx -> J ⋅ dx`.
-_jacobian_2P(pb::BifurcationProblem_2P, ::Union{BK.AutoDiffMF, BK.MatrixFree}, Z, par) =
+# Matrix-free jacobian-vector product obtained by AD of the composite problem.
+_jacobian_2P(pb::BifurcationProblem_2P, ::BK.AutoDiffMF, Z, par) =
     dx -> ForwardDiff.derivative(t -> pb(Z .+ t .* dx, par), zero(eltype(Z)))
 
 # Matrix-free jacobian-vector product obtained by finite differences.
@@ -205,9 +208,7 @@ function project_on_M(prob, guess, chart::Chart, wbar, cpar::CoveringPar{T, <: B
             options = @set options.linsolver = cpar.solver_bls
         end
         Φ = chart.Φ
-        function f(w, p)
-            vcat(BK.residual(prob.VF, w, p), apply_T(weights, Φ, w - wbar))
-        end
+        f(w, p) = vcat(BK.residual(prob.VF, w, p), apply_T(weights, Φ, w - wbar))
         prob_bls = BifurcationProblem(f, guess, BK.getparams(prob.VF))
         sol = BK.solve(prob_bls, BK.Newton(), options)
     end
@@ -220,12 +221,14 @@ end
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 for BKP in (:ManifoldProblemBK, :ManifoldProblemBKMatrixFree)
     @eval begin
-        function get_tangent(prob::$BKP{Tu, Tp, TVF, Trec, Tproj, BorderedTangent}, u0, par, RHS) where {Tu <: AbstractVector, Tp, TVF, Trec, Tproj}
-            return _get_tangent_bordered(prob, u0, par, RHS)
+        function get_tangent(prob::$BKP{Tu, Tp, TVF, Trec, Tproj, BorderedTangent}, u0, par, RHS, Φ0 = nothing) where {Tu <: AbstractVector, Tp, TVF, Trec, Tproj}
+            @assert false
+            return _get_tangent_bordered(prob, u0, par, RHS, Φ0)
         end
 
-        function get_tangent(prob::$BKP{Tu, Tp, TVF, Trec, Tproj, QRDirectTangent}, u0, par, RHS) where {Tu <: AbstractVector, Tp, TVF, Trec, Tproj}
-            return _get_tangent_QR(prob, u0, par, RHS)
+        function get_tangent(prob::$BKP{Tu, Tp, TVF, Trec, Tproj, QRDirectTangent}, u0, par, RHS, Φ0 = nothing) where {Tu <: AbstractVector, Tp, TVF, Trec, Tproj}
+            @assert false
+            return _get_tangent_QR(prob, u0, par, RHS, Φ0)
         end
     end
 end

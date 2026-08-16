@@ -20,6 +20,20 @@ Squared euclidean distance. This version is non allocating compared to `norm(u1 
 @inline dist2(w::AbstractVector, u1, u2) = mapreduce(x -> x[3] * abs2(x[1] - x[2]), +, zip(u1, u2, w))
 
 
+"""
+Orthonormalize the columns of `T` (n × k) in the weighted metric D = Diagonal(w),
+i.e. return Φ = T * R⁻¹ with Φ' * D * Φ = I.
+"""
+function _weighted_orthonormalize(T, w::AbstractVector)
+    G = T' * (Diagonal(w) * T)
+    R = cholesky(Hermitian(G)).U
+    return T / R
+end
+
+weighted_orthonormalize(T, w::Weight) = _weighted_orthonormalize(T, get_weights(w))
+_weighted_orthonormalize(T, ::TrivialWeight) = Matrix(qr(T).Q)
+
+
 abstract type AbstractJacobianType end
 
 """

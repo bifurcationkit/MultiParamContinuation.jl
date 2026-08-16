@@ -55,7 +55,7 @@ for (op, at) in ((:ManifoldProblem , :AbstractManifoldProblem),
         recordFromSolution::Trec
         "Function to project a point from a tangent space to the manifold. If not provided, a newton algorithm is used. The signature is `project(u, par)` and returns a vector of solutions."
         project::Tproj
-        "Compute an orthonormal basis of the tangent space at a point u on the manifold. Return a matrix of dimension n x (n-m). The signature is `get_tangent(u, par)`. If not provided, a dedicaded function is used."
+        "Compute a basis of the tangent space at a point `u` on the manifold, orthonormal in the metric defined by `weights`. Returns a matrix of dimension `n × (n-m)`. The signature is `get_tangent(u, par)`. If not provided, a dedicated function is used."
         get_tangent::Ttangent
         "Estimate the radius of validity of a chart centered at `u` (for example from the curvature of the manifold). The signature is `get_radius(u, par)`. If not provided, a dedicated function is used."
         get_radius::Tradius
@@ -153,11 +153,11 @@ bordered system
 where T is a random matrix (see `BorderedTangent`). Alternatively a direct QR
 factorization of `Jᵀ` can be used (see `QRDirectTangent`).
 """
-function get_tangent(prob, u0, par, RHS)
+function get_tangent(prob, u0, par, RHS, Φ0 = nothing)
     if _has_tangent_computation(prob)
         return prob.get_tangent(u0, par)
     else
-        return _get_tangent_bordered(prob, u0, par, RHS)
+        return _get_tangent_bordered(prob, u0, par, RHS, Φ0)
     end
 end
 
@@ -167,16 +167,28 @@ $TYPEDSIGNATURES
 Compute an orthonormal basis of the tangent space at `u0` by solving the bordered
 system `[J; T] Φ = [0; I(k)]`, with `J = jacobian(prob, u0, par)` and a random
 border `T` of size `k × n` (`k = n - m`).
+
+If a guess `Φ0` (the tangent space of a nearby chart) is provided, it is used as the
+border `Φ0' * D` instead of the random one;
+this ensures continuity of the basis along the manifold.
 """
-function _get_tangent_bordered(prob, u0, par, RHS)
+function _get_tangent_bordered(prob, u0, par, RHS, Φ0 = nothing)
+    # @error "_get_tangent_bordered"
     J = jacobian(prob, u0, par)
     n, m = size(prob)
-    _A = vcat(J, rand(n-m, n))
-    T = _A \ RHS
-    _A = vcat(J, T')
-    T = _A \ RHS
-    fact = qr(T)
-    T = Matrix(fact.Q)
+    weights = get_weights(prob)
+    if isnothing(Φ0)
+        _A = vcat(J, rand(n-m, n))
+        T = _A \ RHS
+        _A = vcat(J, T')
+        T = _A \ RHS
+    else
+        w = get_weights(weights)
+        B = w isa TrivialWeight ? Φ0' : Φ0' * Diagonal(w)
+        T = vcat(J, B) \ RHS
+    end
+    # weights = Weight(TrivialWeight())
+    return weighted_orthonormalize(T, weights)
 end
 
 """
@@ -186,17 +198,19 @@ Compute an orthonormal basis of the tangent space at `u0` by a direct QR
 factorization of `Jᵀ`, with `J = jacobian(prob, u0, par)`. The last `n - m`
 columns of the full `Q` span the null space of `J`.
 """
-function _get_tangent_QR(prob, u0, par, RHS)
+function _get_tangent_QR(prob, u0, par, RHS, Φ0 = nothing)
+    # note: the guess Φ0 is ignored, the QR factorization gives no continuity of the basis
     J = jacobian(prob, u0, par)
     n, m = size(prob)
     F = qr(Matrix(J'))
     Q = F.Q * Matrix{eltype(J)}(I, n, n)
-    return Q[:, m+1:n]
+    weights = get_weights(prob)
+    return weighted_orthonormalize(Q[:, m+1:n], weights)
 end
 
-get_tangent(prob::ManifoldProblem{Tu, Tp, TVF, Trec, Tproj, BorderedTangent}, u0, par, RHS) where {Tu <: AbstractVector, Tp, TVF, Trec, Tproj} = _get_tangent_bordered(prob, u0, par, RHS)
+get_tangent(prob::ManifoldProblem{Tu, Tp, TVF, Trec, Tproj, BorderedTangent}, u0, par, RHS, Φ0 = nothing) where {Tu <: AbstractVector, Tp, TVF, Trec, Tproj} = _get_tangent_bordered(prob, u0, par, RHS, Φ0)
 
-get_tangent(prob::ManifoldProblem{Tu, Tp, TVF, Trec, Tproj, QRDirectTangent}, u0, par, RHS) where {Tu <: AbstractVector, Tp, TVF, Trec, Tproj} = _get_tangent_QR(prob, u0, par, RHS)
+get_tangent(prob::ManifoldProblem{Tu, Tp, TVF, Trec, Tproj, QRDirectTangent}, u0, par, RHS, Φ0 = nothing) where {Tu <: AbstractVector, Tp, TVF, Trec, Tproj} = _get_tangent_QR(prob, u0, par, RHS, Φ0)
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function project(prob, u0, par)
     prob.project(u0, par)

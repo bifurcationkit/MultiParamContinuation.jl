@@ -30,6 +30,17 @@ Base.@kwdef struct Henderson{T} <: AbstractCoveringAlgorithm
     children_pre_leaf::Int = 5
 end
 
+function Base.show(io::IO, alg::Henderson)
+    println(io, "Henderson")
+    println(io, "  ├─ np0 = ", alg.np0)
+    println(io, "  ├─ use_curvature = ", alg.use_curvature)
+    println(io, "  ├─ radius_factor = ", alg.radius_factor)
+    println(io, "  ├─ θmax = ", alg.θmax)
+    println(io, "  ├─ θmin = ", alg.θmin)
+    println(io, "  ├─ use_tree = ", alg.use_tree)
+    println(io, "  └─ children_pre_leaf = ", alg.children_pre_leaf)
+end
+
 """
 $TYPEDEF
 
@@ -200,7 +211,7 @@ function _new_chart_from_guess(cache, chart, ω;
     if isnothing(u)
         return nothing
     end
-    Φ = get_tangent(prob, u, prob.params, cache._rhs_tangent)
+    Φ = get_tangent(prob, u, prob.params, cache._rhs_tangent, chart.Φ)
     if isnothing(Φ)
         return nothing
     end
