@@ -30,6 +30,7 @@ for (M, OP) in ((:ManifoldProblem_BK, :ManifoldProblemBK),
                     get_tangent = nothing,
                     event_function = event_default,
                     finalize_solution = finalize_default,
+                    project_for_tree = project_for_tree_default,
                     prob_cons = nothing,
                     weights = Weight(TrivialWeight()),
                     )
@@ -37,7 +38,8 @@ for (M, OP) in ((:ManifoldProblem_BK, :ManifoldProblemBK),
             m = length(BK.residual(bifprob.VF, u0, par))
             _make_manifold_problem($OP, bifprob, u0, par, m;
                         check_dim, record_from_solution, project, get_radius,
-                        get_tangent, event_function, finalize_solution, prob_cons, weights)
+                        get_tangent, event_function, finalize_solution, project_for_tree,
+                        prob_cons, weights)
         end
 
         """
@@ -68,6 +70,7 @@ for (M, OP) in ((:ManifoldProblem_BK, :ManifoldProblemBK),
                     record_from_solution = record_from_solution_nothing,
                     event_function = event_default,
                     finalize_solution = finalize_default,
+                    project_for_tree = project_for_tree_default,
                     weights = Weight(TrivialWeight()),
                     jacobian = nothing,
                     )
@@ -91,7 +94,8 @@ for (M, OP) in ((:ManifoldProblem_BK, :ManifoldProblemBK),
 
             _make_manifold_problem($OP, prob_mpc, new_u0, par, m;
                         check_dim, record_from_solution, project, get_radius,
-                        get_tangent, event_function, finalize_solution, prob_cons, weights)
+                        get_tangent, event_function, finalize_solution, project_for_tree,
+                        prob_cons, weights)
         end
     end
 end
@@ -109,6 +113,7 @@ function _make_manifold_problem(::Type{OP}, F, u0, par, m;
                                 get_tangent = nothing,
                                 event_function = event_default,
                                 finalize_solution = finalize_default,
+                                project_for_tree = project_for_tree_default,
                                 prob_cons = nothing,
                                 weights = Weight(TrivialWeight()),
                                 ) where {OP}
@@ -119,7 +124,7 @@ function _make_manifold_problem(::Type{OP}, F, u0, par, m;
     OP(n, m, F, u0, par,
         record_from_solution, project, get_tangent, get_radius,
         event_function, finalize_solution,
-        MultiParamContinuation.project_for_tree_default,
+        project_for_tree,
         prob_cons,
         MultiParamContinuation.update_default,
         weights)
@@ -166,7 +171,7 @@ function _jacobian_2P(pb::BifurcationProblem_2P, ::Nothing, Z, par)
     par2 = BK._set(par, (pb.lens1, pb.lens2), (p1, p2))
     J0 = BK.jacobian(pb.prob, u, par2)
     l1, l2 = _jacobian_param(pb, Z, par)
-    hcat(J0, l1, l2)
+    return hcat(J0, l1, l2)
 end
 
 # Dense jacobian obtained by automatic differentiation of the composite problem.

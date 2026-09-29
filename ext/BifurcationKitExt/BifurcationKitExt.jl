@@ -14,6 +14,7 @@ module BifurcationKitExt
                                     get_radius_default,
                                     event_default,
                                     finalize_default,
+                                    project_for_tree_default,
                                     _has_projection,
                                     get_tangent,
                                     _has_tangent_computation,

@@ -35,11 +35,11 @@ end
 function Base.show(io::IO, alg::Henderson)
     println(io, "Henderson")
     println(io, "  ├─ np0 = ", alg.np0)
-    println(io, "  ├─ use_curvature = ", alg.use_curvature)
     println(io, "  ├─ radius_factor = ", alg.radius_factor)
     println(io, "  ├─ θmax = ", alg.θmax)
     println(io, "  ├─ θmin = ", alg.θmin)
     println(io, "  ├─ use_tree = ", alg.use_tree)
+    println(io, "  ├─ use_curvature = ", alg.use_curvature)
     println(io, "  └─ children_pre_leaf = ", alg.children_pre_leaf)
 end
 

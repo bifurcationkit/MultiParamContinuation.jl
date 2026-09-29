@@ -51,6 +51,28 @@ function update_bb!(A::AABB, c::Chart)
     A
 end
 
+"""
+Point of chart `S[id]` used to build the bounding boxes of the tree. It is the
+projection `project_for_tree(u, p)` when provided, otherwise the raw point `u`. The
+projection must be chosen so that the sphere test `dist2(weights, u1, u2) <= (R1 + R2)^2`
+implies `max_i |p1[i] - p2[i]| <= R1 + R2`.
+"""
+function _tree_point(S::Atlas, id::Int)
+    prob = S.alg.prob
+    pr = prob.project_for_tree(S[id].u, prob.params)
+    return isnothing(pr) ? S[id].u : pr
+end
+
+function update_bb!(A::AABB, S::Atlas, id::Int)
+    c = S[id]
+    p = _tree_point(S, id)
+    for i in eachindex(A.min)
+        A.min[i] = min(A.min[i], p[i] - c.R)
+        A.max[i] = max(A.max[i], p[i] + c.R)
+    end
+    A
+end
+
 update_bb!(::AABB, ::Nothing) = nothing
 update_bb!(::Nothing, ::AABB) = nothing
 
@@ -154,7 +176,7 @@ function add!(node::BVHNode, S::Atlas, id::Int)
             # node is leaf with enough space, add id to chart_ids
             push!(node.chart_ids, id)
             # update the bounding box
-            update_bb!(node.box, S[id])
+            update_bb!(node.box, S, id)
         elseif is_leaf(node)
             # split the node in the direction with largest spread
             node_ids = SA[node.chart_ids..., id]
@@ -164,24 +186,24 @@ function add!(node::BVHNode, S::Atlas, id::Int)
 
             split_dim = perm[1]
             # split_value = (maxs[split_dim] + mins[split_dim])/2
-            split_value = median(c.u[split_dim] for c in S.atlas[node_ids])
+            split_value = median(_tree_point(S, i)[split_dim] for i in node_ids)
 
             node.is_leaf = false
-            update_bb!(node.box, S[id])
+            update_bb!(node.box, S, id)
 
             # update split info in current node
             node.split_dim = parent_split_dim(node) == split_dim ? perm[2] : split_dim
             node.split_value = split_value
 
-            node.left_child = BVHNode(length(S[id].u);parent = node, split_dim = 0, max_size = node.max_size)
-            node.right_child = BVHNode(length(S[id].u);parent = node, split_dim = 0, max_size = node.max_size)
+            node.left_child = BVHNode(length(node.box.min);parent = node, split_dim = 0, max_size = node.max_size)
+            node.right_child = BVHNode(length(node.box.min);parent = node, split_dim = 0, max_size = node.max_size)
 
             # partition of the ids. The median split may leave one side empty
             # (e.g. all points share the same coordinate along `split_dim`),
             # in which case we fall back to a half/half partition to guarantee
             # that the recursion terminates.
-            ids_left  = [i for i in node_ids if S[i].u[split_dim] <  split_value]
-            ids_right = [i for i in node_ids if S[i].u[split_dim] >= split_value]
+            ids_left  = [i for i in node_ids if _tree_point(S, i)[split_dim] <  split_value]
+            ids_right = [i for i in node_ids if _tree_point(S, i)[split_dim] >= split_value]
             if isempty(ids_left) || isempty(ids_right)
                 mid = cld(length(node_ids), 2)
                 ids_left  = collect(node_ids[1:mid])
@@ -199,7 +221,7 @@ function add!(node::BVHNode, S::Atlas, id::Int)
         end
     else
          # we need to add the chart to the appropriate sub node in the tree
-        if S[id].u[node.split_dim] < node.split_value
+        if _tree_point(S, id)[node.split_dim] < node.split_value
             add!(node.left_child, S, id)
         else
             add!(node.right_child, S, id)
@@ -224,7 +246,8 @@ Compute the nearest neighbors from `S[id]` in the BVH tree. We know that AABB(S[
 """
 function neighbors(tree::BVHNode, S::Atlas, id::Int)
     c = S[id]
-    aabb = AABB(c.u .- c.R, c.u .+ c.R)
+    p = _tree_point(S, id)
+    aabb = AABB(p .- c.R, p .+ c.R)
     list = Int[]
     _query(tree, aabb, list)
     list

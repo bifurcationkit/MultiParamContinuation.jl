@@ -118,7 +118,12 @@ Base.lastindex(Ω::Atlas) = lastindex(Ω.atlas)
 # constructor
 function new_atlas(c::Tc, cache::Talg = nothing; dim::Int = 2) where {Tu, Ttg, Tc <: Chart{Tu, Ttg}, Talg}
     max_size = cache.alg.children_pre_leaf
-    tree = cache.alg.use_tree ? BVHNode(length(c.u); max_size) : nothing
+    tree = if cache.alg.use_tree
+        pr = cache.prob.project_for_tree(c.u, cache.prob.params)
+        BVHNode(isnothing(pr) ? length(c.u) : length(pr); max_size)
+    else
+        nothing
+    end
     Ω = Atlas{dim, Tc, Talg, typeof(tree)}([c], Vector{Tc}(), cache, tree)
     if use_tree(Ω)
         add!(Ω.tree, Ω, length(Ω))
