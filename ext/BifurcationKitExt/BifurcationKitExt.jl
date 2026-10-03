@@ -7,6 +7,7 @@ module BifurcationKitExt
     
     import MultiParamContinuation: correct_guess,
                                     project_on_M,
+                                    project,
                                     AbstractManifoldProblemBifurcationKit,
                                     ManifoldProblemBK,
                                     ManifoldProblemBKMatrixFree,

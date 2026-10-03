@@ -20,5 +20,9 @@ end
 @testset "sphere BifurcationKit" begin
     include("sphere_bk.jl")
     include("abc.jl")
-    # include("bls_tangent.jl")
+    include("bls_tangent.jl")
+end
+
+@testset "BifurcationKit problems ext" begin
+    include("problems_ext.jl")
 end
