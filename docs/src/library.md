@@ -36,7 +36,19 @@ MultiParamContinuation.ManifoldProblemBK
 ```
 
 ```@docs
+MultiParamContinuation.ManifoldProblemBKMatrixFree
+```
+
+```@docs
 MultiParamContinuation.get_tangent
+```
+
+```@docs
+MultiParamContinuation.get_curvature
+```
+
+```@docs
+BifurcationKitExt.BLSBorderedTangent
 ```
 
 ## Continuation algorithms
