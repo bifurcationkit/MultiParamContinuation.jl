@@ -55,6 +55,7 @@ which has 3 equations for 3 state unknowns (so `n - m = 2`):
 
 ```@example TUTMF
 using BifurcationKit, MultiParamContinuation
+const BK = BifurcationKit
 const MPC = MultiParamContinuation
 const MPCExt = Base.get_extension(MultiParamContinuation, :BifurcationKitExt)
 
